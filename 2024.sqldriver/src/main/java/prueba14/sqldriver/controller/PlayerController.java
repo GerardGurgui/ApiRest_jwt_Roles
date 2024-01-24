@@ -25,7 +25,6 @@ public class PlayerController {
     ////----> CRUD
 
     //--> CREATE
-    //SUSTITUIR POR REGISTER DE AUTHCONTROLLER??
 
     @PostMapping("/add")
     public ResponseEntity<Player> addPlayer(@RequestBody PlayerDto jugadorDTO){
@@ -56,13 +55,6 @@ public class PlayerController {
 
     @GetMapping("/get/getByUsername/{username}")
     public ResponseEntity<Player> getOnePlayerByUsername(@PathVariable String username){
-
-        String userNameAutenticated = userDetailsServiceImple.getAuthenticatedUsername();
-
-        if (!userNameAutenticated.equalsIgnoreCase(username)){
-
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
 
         return ResponseEntity.ok(playerService.getOnePlayerByUsername(username));
     }

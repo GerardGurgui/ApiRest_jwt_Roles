@@ -1,5 +1,6 @@
 package prueba14.sqldriver.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,6 +22,8 @@ public class Player {
     private Long id;
     private String username;
     private String email;
+
+    @JsonIgnore
     private String password;
 
     private int puntuacion;
