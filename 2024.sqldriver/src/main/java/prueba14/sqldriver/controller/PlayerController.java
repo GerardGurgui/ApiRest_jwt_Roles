@@ -3,10 +3,12 @@ package prueba14.sqldriver.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import prueba14.sqldriver.DTO.PlayerDto;
 import prueba14.sqldriver.entities.Dice;
 import prueba14.sqldriver.entities.Player;
+import prueba14.sqldriver.entities.Roles;
 import prueba14.sqldriver.security.service.UserDetailsServiceImple;
 import prueba14.sqldriver.service.PlayerService;
 
@@ -76,19 +78,22 @@ public class PlayerController {
 
 
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public void deletePlayer(@PathVariable Long id){
 
         Long idAutenticado = userDetailsServiceImple.getAuthenticatedUserId(id).getBody();
 
         if (!idAutenticado.equals(id)){
 
-            throw new RuntimeException("No tienes permisos para borrar este jugador");
+            throw new RuntimeException("you are not authorized to delete this player");
         }
 
         playerService.deletePlayer(id);
     }
 
-    /////DADOS, FUNCIONES JUEGO
+
+
+    /////DADOS, FUNCIONES JUEGO, ROLES
 
     @PostMapping("/dice/throw/{id}")
     public ResponseEntity<Dice> playerThrowDice(@PathVariable Long id){
@@ -102,4 +107,11 @@ public class PlayerController {
 
         return ResponseEntity.ok(playerService.playerThrowDice(id));
     }
+
+    @PostMapping("/roles/add/{playerId}/{rolename}")
+    public void addRole(@PathVariable Long playerId,@PathVariable String rolename) {
+
+        playerService.addRoleToPlayer(rolename, playerId);
+    }
+
 }

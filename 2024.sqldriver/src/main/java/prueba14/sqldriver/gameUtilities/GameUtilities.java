@@ -3,8 +3,6 @@ package prueba14.sqldriver.gameUtilities;
 import prueba14.sqldriver.entities.Dice;
 import prueba14.sqldriver.entities.Player;
 
-import java.util.List;
-
 public class GameUtilities {
 
     public static Dice LaunchDice(){
@@ -63,7 +61,7 @@ public class GameUtilities {
 
         int totalPuntuacion = player.getPuntuacion();
 
-        int totalTiradas = player.getTiradas().size();
+        int totalTiradas = player.getThrowsDices().size();
 
         return (totalPuntuacion * 100) / totalTiradas;
 

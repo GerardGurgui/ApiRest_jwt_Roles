@@ -1,8 +1,14 @@
 package prueba14.sqldriver.entities;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.http.HttpStatus;
+import prueba14.sqldriver.exceptions.PlayerHaveRoleException;
+import prueba14.sqldriver.exceptions.PlayerNotFoundException;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -12,7 +18,6 @@ import java.util.Set;
 
 @Getter
 @Setter
-
 @Table(name = "Players")
 @Entity
 public class Player {
@@ -27,40 +32,77 @@ public class Player {
     private String password;
 
     private int puntuacion;
-    private int victoria;
+    private int winner;
 
     @Column(name = "porcentaje_acierto")
     private int acierto;
 
-    @Column(name = "fecha_registro")
-    private LocalDate fechaRegistro;
+    @Column(name = "login_date")
+    private LocalDate loginDate;
 
     //Lazy para las peticiones que le pedimos y no todo lo relacionado
     @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     @JoinColumn(name = "id_player", referencedColumnName = "id")
-    private Set<Dice> tiradas;
+    private Set<Dice> throwsDices;
+
+    @ManyToMany
+    @JoinTable(name = "player_roles",
+            joinColumns = @JoinColumn(name = "id_player", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "id_role", referencedColumnName = "id"))
+    @JsonManagedReference // manejar serializacion de los jugadores y no entrar en bucle
+    private Set<Roles> roles;
 
     public Player() {
     }
 
-    public Player(Long id, String username, String email, String password, int puntuacion, int victoria) {
+    public Player(Long id, String username, String email, String password, int puntuacion, int winner) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.password = password;
         this.puntuacion = puntuacion;
-        this.victoria = victoria;
+        this.winner = winner;
     }
 
-    public void addTirada(Dice tirada){
+    public void addThrow(Dice tirada){
 
-        if (tiradas == null){
-            tiradas = new HashSet<>();
+        if (throwsDices == null){
+            throwsDices = new HashSet<>();
         }
 
-        tiradas.add(tirada);
+        throwsDices.add(tirada);
     }
 
+    //////ROLES
 
+    public void addRole(Roles role){
+
+        if (hasRole()){
+
+            throw new PlayerHaveRoleException(HttpStatus.CONFLICT,"Player already have role");
+        }
+
+        if (roles == null){
+            roles = new HashSet<>();
+        }
+
+        roles.add(role);
+    }
+
+    public boolean hasRole(){
+
+        boolean hasRole = false;
+
+        for (Roles role : roles) {
+
+            if (role.getName().equalsIgnoreCase("USER")
+                || role.getName().equalsIgnoreCase("ADMIN")){
+
+                hasRole = true;
+            }
+        }
+
+        return hasRole;
+    }
 
 }

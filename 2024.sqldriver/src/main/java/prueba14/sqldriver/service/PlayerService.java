@@ -8,27 +8,25 @@ import org.springframework.stereotype.Service;
 import prueba14.sqldriver.DTO.PlayerDto;
 import prueba14.sqldriver.entities.Dice;
 import prueba14.sqldriver.entities.Player;
-import prueba14.sqldriver.exceptions.ExistentEmailException;
-import prueba14.sqldriver.exceptions.ExistentUsernameException;
-import prueba14.sqldriver.exceptions.PlayerNotFoundException;
+import prueba14.sqldriver.entities.Roles;
+import prueba14.sqldriver.exceptions.*;
 import prueba14.sqldriver.gameUtilities.GameUtilities;
 import prueba14.sqldriver.mapper.Map;
 import prueba14.sqldriver.repository.DiceRepository;
 import prueba14.sqldriver.repository.PlayerRepository;
+import prueba14.sqldriver.repository.RolesRepository;
 
 import java.util.List;
 
 @Service
 public class PlayerService {
-
     private final Logger log = LoggerFactory.getLogger(Player.class);
-
     @Autowired
     private PlayerRepository playerRepository;
-
     @Autowired
     private DiceRepository diceRepository;
-
+    @Autowired
+    private RolesRepository rolesRepository;
     @Autowired
     private Map mapping;
 
@@ -41,18 +39,36 @@ public class PlayerService {
         //MAPEAR DE DTO A ENTIDAD (COMPROBAR NOMBRE VACÍO)
         Player playerEntity = mapping.map(playerDto);
 
-        //COMPROBAR SI YA EXISTE ESE JUGADOR O NO
         boolean playerExists = playerRepository.existsByUsername(playerDto.getUsername());
 
         if (playerExists && !playerEntity.getUsername().equalsIgnoreCase("Anonimo")){
 
-            throw new ExistentUsernameException(HttpStatus.FOUND,"Este nombre de usuario ya existe");
+            throw new ExistentUsernameException(HttpStatus.FOUND,"this username is already taken");
         }
 
         log.info("jugador creado correctamente");
 
         return playerRepository.save(playerEntity);
 
+    }
+
+    public void addRoleToPlayer(String rolename, Long playerId){
+
+        //comprobar si existe el jugador
+        Player player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new PlayerNotFoundException(HttpStatus.NOT_FOUND, "Player not found"));
+
+        //comprobar si existe el rol
+        Roles role = rolesRepository.findByName(rolename)
+                .orElseThrow(() -> new RolNotFoundException(HttpStatus.NOT_FOUND, "Role not found"));
+
+        //comprobar si el admin ya está asignado a un usuario (solo puede haber un admin)
+        if (rolename.equalsIgnoreCase("admin") && rolesRepository.existsByRoleName("admin")) {
+            throw new AdminAlreadyExistsException(HttpStatus.CONFLICT, "admin already exists");
+        }
+
+        player.addRole(role);
+        playerRepository.save(player);
     }
 
     ////////READ
@@ -69,7 +85,7 @@ public class PlayerService {
 
         if (!existsById){
 
-            throw new PlayerNotFoundException(HttpStatus.NOT_FOUND,"El jugador con id " + id + " no existe ");
+            throw new PlayerNotFoundException(HttpStatus.NOT_FOUND,"player with id " + id + " doesn`t exist ");
         }
 
         return playerRepository.findById(id).get();
@@ -88,8 +104,6 @@ public class PlayerService {
 
             throw new PlayerNotFoundException(HttpStatus.CONFLICT, "Existe más de un usuario con el nombre anonimo");
         }
-
-
 
         return playerRepository.getPlayerByUsername(username).get();
     }
@@ -113,15 +127,10 @@ public class PlayerService {
         playerToUpdate.setUsername(playerDto.getUsername());
         playerToUpdate.setEmail(playerDto.getEmail());
 
-
         return playerRepository.save(playerToUpdate);
-
     }
 
-
-
     ////////DELETE
-
 
     public void deletePlayer(Long id){
 
@@ -131,9 +140,7 @@ public class PlayerService {
 
     }
 
-
     /////FUNCIONALIDADES JUEGOS (TIRADAS DE DADOS, PORCENTAJES ETC)
-
 
     public Dice playerThrowDice(Long id){
 
@@ -165,34 +172,26 @@ public class PlayerService {
             //COMPROBAR GANADOR DE LA PARTIDA
             if (ganadorPartida){
 
-                player.setVictoria(1);
+                player.setWinner(1);
             }
-
         }else {
 
             player.setAcierto(0);
         }
 
-
     }
-
     public void sumarPuntuacion(Player player){
 
         int puntuacion = player.getPuntuacion();
         puntuacion++;
         player.setPuntuacion(puntuacion);
         player.setAcierto(100);
-
     }
-
     public void asignarTirada(Player player, Dice dice){
 
-        player.addTirada(dice);
+        player.addThrow(dice);
 
         int porcentaje = GameUtilities.checkAveragePlayer(player);
         player.setAcierto(porcentaje);
-
     }
-
-
 }

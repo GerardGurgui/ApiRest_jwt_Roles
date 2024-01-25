@@ -30,7 +30,7 @@ public class Map implements Imapper<PlayerDto, Player> {
 
         player.setEmail(playerDto.getEmail());
         player.setPassword(encoder.encode(playerDto.getPassword()));
-        player.setFechaRegistro(LocalDate.now());
+        player.setLoginDate(LocalDate.now());
 
         return player;
 
