@@ -56,29 +56,23 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtTokenUtil.generateToken(authentication);
 
-        // UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-
         return ResponseEntity.ok(new JwtResponse(jwt));
     }
 
     @PostMapping("/register")
     public ResponseEntity<MessageResponse> register(@RequestBody PlayerDto playerDto) {
 
-        // Check 1: username
         if (playerRepository.existsByUsername(playerDto.getUsername())) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: Username is already taken!"));
         }
 
-        // Check 2: email
         if (playerRepository.existsByEmail(playerDto.getEmail())) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: Email is already in use!"));
         }
-
-        // Create new user's account -- ADAPTAR A MI ENTIDAD JUGADOR
 
         playerService.createPlayer(playerDto);
 

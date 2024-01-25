@@ -13,9 +13,8 @@ public interface RolesRepository extends JpaRepository<Roles, Long>{
 
     Optional<Roles> findByName(String name);
 
-    @Query("SELECT CASE WHEN COUNT(p) > 0 " +
-            "THEN true ELSE false END" +
-            "FROM Player p JOIN p.roles r" +
+    @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END " +
+            "FROM Player p JOIN p.roles r " +
             "WHERE r.name = :roleName")
     boolean existsByRoleName(@Param("roleName") String roleName);
 

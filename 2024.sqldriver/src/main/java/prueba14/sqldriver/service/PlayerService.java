@@ -17,10 +17,11 @@ import prueba14.sqldriver.repository.PlayerRepository;
 import prueba14.sqldriver.repository.RolesRepository;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class PlayerService {
-    private final Logger log = LoggerFactory.getLogger(Player.class);
+
     @Autowired
     private PlayerRepository playerRepository;
     @Autowired
@@ -46,8 +47,6 @@ public class PlayerService {
             throw new ExistentUsernameException(HttpStatus.FOUND,"this username is already taken");
         }
 
-        log.info("jugador creado correctamente");
-
         return playerRepository.save(playerEntity);
 
     }
@@ -64,6 +63,7 @@ public class PlayerService {
 
         //comprobar si el admin ya está asignado a un usuario (solo puede haber un admin)
         if (rolename.equalsIgnoreCase("admin") && rolesRepository.existsByRoleName("admin")) {
+
             throw new AdminAlreadyExistsException(HttpStatus.CONFLICT, "admin already exists");
         }
 
@@ -97,12 +97,7 @@ public class PlayerService {
 
         if (!existsUsername){
 
-            throw new PlayerNotFoundException(HttpStatus.NOT_FOUND,"El jugador con username " + username + " no existe ");
-        }
-
-        if (username.equalsIgnoreCase("Anonimo") && findAllPlayers().size() <= 2){
-
-            throw new PlayerNotFoundException(HttpStatus.CONFLICT, "Existe más de un usuario con el nombre anonimo");
+            throw new PlayerNotFoundException(HttpStatus.NOT_FOUND, "player " + username + "doesn`t exist");
         }
 
         return playerRepository.getPlayerByUsername(username).get();
@@ -116,12 +111,12 @@ public class PlayerService {
 
         if (playerRepository.existsByEmail(playerDto.getEmail())){
 
-            throw new ExistentEmailException(HttpStatus.FOUND,"El email " +playerDto.getEmail()+ " ya existe");
+            throw new ExistentEmailException(HttpStatus.FOUND,"Email" +playerDto.getEmail()+ " already exists");
         }
 
         if (playerRepository.existsByUsername(playerDto.getUsername())){
 
-            throw new ExistentUsernameException(HttpStatus.FOUND, "El usuario con nombre " +playerDto.getUsername() + " ya existe ");
+            throw new ExistentUsernameException(HttpStatus.FOUND, "User " +playerDto.getUsername() + " already exists");
         }
 
         playerToUpdate.setUsername(playerDto.getUsername());
@@ -156,6 +151,21 @@ public class PlayerService {
         asignarTirada(player,dice);
 
         return diceRepository.save(dice);
+    }
+
+    public void deleteThrows(Long id){
+
+        Player player = getOnePlayerByID(id);
+
+        if (player.getThrowsDices().isEmpty()){
+
+            throw new PlayerNoDiceException(HttpStatus.NOT_FOUND,"This player don't have any dices throws");
+        }
+
+        player.getThrowsDices().clear();
+
+        playerRepository.save(player);
+
     }
 
     //COMPRUEBA PUNTUACION DE RONDA Y PUNTUACION DE PARTIDA, INSERTA PORCENTAJES

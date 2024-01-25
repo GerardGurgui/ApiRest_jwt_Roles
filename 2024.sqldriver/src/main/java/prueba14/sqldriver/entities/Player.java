@@ -41,11 +41,11 @@ public class Player {
     private LocalDate loginDate;
 
     //Lazy para las peticiones que le pedimos y no todo lo relacionado
-    @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JoinColumn(name = "id_player", referencedColumnName = "id")
     private Set<Dice> throwsDices;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "player_roles",
             joinColumns = @JoinColumn(name = "id_player", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "id_role", referencedColumnName = "id"))

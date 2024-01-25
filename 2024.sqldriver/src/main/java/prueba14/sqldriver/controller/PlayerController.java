@@ -81,13 +81,6 @@ public class PlayerController {
     @PreAuthorize("hasRole('ADMIN')")
     public void deletePlayer(@PathVariable Long id){
 
-        Long idAutenticado = userDetailsServiceImple.getAuthenticatedUserId(id).getBody();
-
-        if (!idAutenticado.equals(id)){
-
-            throw new RuntimeException("you are not authorized to delete this player");
-        }
-
         playerService.deletePlayer(id);
     }
 
@@ -108,8 +101,23 @@ public class PlayerController {
         return ResponseEntity.ok(playerService.playerThrowDice(id));
     }
 
+    @DeleteMapping("/dice/delete/{id}")
+    public ResponseEntity<String> deleteThrows(@PathVariable Long id){
+
+        Long idAutenticado = userDetailsServiceImple.getAuthenticatedUserId(id).getBody();
+
+        if (!idAutenticado.equals(id)){
+
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        playerService.deleteThrows(id);
+        return new ResponseEntity<>("Throws deleted for player " +id, HttpStatus.ACCEPTED);
+    }
+
+    ////ROLES
     @PostMapping("/roles/add/{playerId}/{rolename}")
-    public void addRole(@PathVariable Long playerId,@PathVariable String rolename) {
+    public void addRole(@PathVariable Long playerId, @PathVariable String rolename) {
 
         playerService.addRoleToPlayer(rolename, playerId);
     }

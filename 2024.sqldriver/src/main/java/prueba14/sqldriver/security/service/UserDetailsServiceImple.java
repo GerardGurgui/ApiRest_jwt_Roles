@@ -43,7 +43,6 @@ public class UserDetailsServiceImple implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         //obtener el usuario de la base de datos usando el metodo que lo verifica
-
         Player player = playerRepository.getPlayerByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User " + username + " not found"));
 
