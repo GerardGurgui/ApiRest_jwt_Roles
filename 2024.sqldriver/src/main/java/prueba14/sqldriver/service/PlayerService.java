@@ -1,9 +1,8 @@
 package prueba14.sqldriver.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import prueba14.sqldriver.DTO.PlayerDto;
 import prueba14.sqldriver.entities.Dice;
@@ -28,6 +27,8 @@ public class PlayerService {
     private DiceRepository diceRepository;
     @Autowired
     private RolesRepository rolesRepository;
+    @Autowired
+    private GameUtilities gameUtilities;
     @Autowired
     private Map mapping;
 
@@ -119,8 +120,7 @@ public class PlayerService {
             throw new ExistentUsernameException(HttpStatus.FOUND, "User " +playerDto.getUsername() + " already exists");
         }
 
-        playerToUpdate.setUsername(playerDto.getUsername());
-        playerToUpdate.setEmail(playerDto.getEmail());
+        playerToUpdate = mapping.mapUpdate(playerDto, playerToUpdate);
 
         return playerRepository.save(playerToUpdate);
     }
@@ -142,7 +142,7 @@ public class PlayerService {
         Player player = getOnePlayerByID(id);
 
         //TIRADA DE DADOS Y LA SUMA
-        Dice dice = GameUtilities.LaunchDice();
+        Dice dice = gameUtilities.LaunchDice();
 
         //COMPROBAR PUNTUACION
         checkPuntuationAndAverage(player,dice);
@@ -172,12 +172,12 @@ public class PlayerService {
     public void checkPuntuationAndAverage(Player player, Dice dice){
 
 
-        boolean rondaGanada = GameUtilities.checkWinRound(dice.getResultadoTirada());
+        boolean rondaGanada = gameUtilities.checkWinRound(dice.getResultadoTirada());
 
         if (rondaGanada){
 
             sumarPuntuacion(player);
-            boolean ganadorPartida = GameUtilities.checkWinGame(player.getPuntuacion());
+            boolean ganadorPartida = gameUtilities.checkWinGame(player.getPuntuacion());
 
             //COMPROBAR GANADOR DE LA PARTIDA
             if (ganadorPartida){
@@ -197,11 +197,12 @@ public class PlayerService {
         player.setPuntuacion(puntuacion);
         player.setAcierto(100);
     }
+
     public void asignarTirada(Player player, Dice dice){
 
         player.addThrow(dice);
 
-        int porcentaje = GameUtilities.checkAveragePlayer(player);
+        int porcentaje = gameUtilities.checkAveragePlayer(player);
         player.setAcierto(porcentaje);
     }
 }

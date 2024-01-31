@@ -11,15 +11,20 @@ import java.time.LocalDate;
 @Component
 public class Map implements Imapper<PlayerDto, Player> {
 
-    @Autowired
+
     private PasswordEncoder encoder;
+
+    @Autowired
+    public Map(PasswordEncoder encoder) {
+        this.encoder = encoder;
+    }
 
     @Override
     public Player map(PlayerDto playerDto) {
 
         Player player = new Player();
 
-        if (playerDto.getUsername().isEmpty()){
+        if (playerDto.getUsername().isEmpty()) {
 
             player.setUsername("Anonimo");
 
@@ -35,4 +40,29 @@ public class Map implements Imapper<PlayerDto, Player> {
         return player;
 
     }
+
+    @Override
+    public Player mapUpdate(PlayerDto playerDto, Player playerToUpdate) {
+
+
+
+        if (playerDto.getUsername() != null) {
+
+            playerToUpdate.setUsername(playerDto.getUsername());
+        }
+
+        if (playerDto.getEmail() != null) {
+
+            playerToUpdate.setEmail(playerDto.getEmail());
+        }
+
+        if (playerDto.getPassword() != null) {
+
+            playerToUpdate.setPassword(encoder.encode(playerDto.getPassword()));
+        }
+
+        return playerToUpdate;
+
+    }
+
 }

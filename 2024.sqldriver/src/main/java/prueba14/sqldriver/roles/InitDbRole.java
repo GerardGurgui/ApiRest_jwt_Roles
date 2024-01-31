@@ -21,6 +21,7 @@ public class InitDbRole {
 
     @PostConstruct
     public void initDb() {
+
         Arrays.stream(roles).forEach(role -> {
             if (rolesRepository.findByName(role).isEmpty()) {
                 Roles newRole = new Roles();

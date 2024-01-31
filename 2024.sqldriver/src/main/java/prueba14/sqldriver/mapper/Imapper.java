@@ -5,8 +5,12 @@ package prueba14.sqldriver.mapper;
  * Input Output
  * */
 
+import prueba14.sqldriver.entities.Player;
+
 public interface Imapper<I, O> {
 
     O map(I input);
+
+    O mapUpdate(I input, Player player);
 
 }

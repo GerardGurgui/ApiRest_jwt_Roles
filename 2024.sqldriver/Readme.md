@@ -1,54 +1,57 @@
 # README
 
-## Descripción de la aplicación
+## Application Description
 
-Aplicación de Spring Boot que simula un juego de dados. Los jugadores pueden lanzar dados y los resultados se almacenan en una base de datos.
+This is a Spring Boot application that simulates a dice game. Players can throw dice and the results are stored in a database.
 
-Se registran las puntuaciones de cada jugador, el porcentaje de acierto y la media de los resultados de los dados.
+The scores of each player, the success rate, and the average of the dice results are recorded.
 
-Los jugadores también tienen roles asignados, que pueden ser 'user' o 'admin'.
+Players also have assigned roles, which can be 'user' or 'admin'.
 
-## Tecnologías utilizadas
+## Technologies Used
 
 - Java
 - Spring Boot
-- Spting Data JPA
+- Spring Data JPA
 - MySQL
 - Spring Security
 - JWT
 - Hibernate
 - Maven
-## Seguridad
 
-La aplicación utiliza Spring Security para la autenticación y la autorización. Los usuarios se almacenan en una base de datos y se utiliza JWT para la autenticación.
+## Testing
+- JUnit
+- Mockito
 
-Los usuarios con el rol 'admin' pueden realizar todas las operaciones, mientras que los usuarios con el rol 'user' solo pueden lanzar dados y ver sus propios datos.
+## Security
 
-## Sistema de registro
-el sistema de registro se basa en un sistema de tokens, que se generan al iniciar sesión y se almacenan en el navegador del usuario. 
+The application uses Spring Security for authentication and authorization. Users are stored in a database and JWT is used for authentication.
 
-Estos tokens se utilizan para autenticar al usuario en cada solicitud que realice. Los tokens tienen una duración de 24 horas, tras las cuales el usuario debe volver a iniciar sesión.
+Users with the 'admin' role can perform all operations, while users with the 'user' role can only throw dice and view their own data.
 
-## Entidades
+## Registration System
+The registration system is based on a token system, which are generated when logging in and are stored in the user's browser.
 
-La aplicación tiene las siguientes entidades principales:
+These tokens are used to authenticate the user in each request they make. The tokens have a duration of 24 hours, after which the user must log in again.
 
-- `Player`: Representa a un jugador en el juego. Cada jugador tiene un conjunto de roles y puede lanzar dados.
-- `Dice`: Representa un lanzamiento de dados. Cada lanzamiento de dados está asociado con un jugador.
-- `Roles`: Representa los roles que puede tener un jugador. Los roles pueden ser 'user' o 'admin'.
+## Entities
+
+The application has the following main entities:
+
+- `Player`: Represents a player in the game. Each player has a set of roles and can throw dice.
+- `Dice`: Represents a dice throw. Each dice throw is associated with a player.
+- `Roles`: Represents the roles a player can have. The roles can be 'user' or 'admin'.
 
 ## Endpoints
 
-La aplicación expone los siguientes endpoints:
+The application exposes the following endpoints:
 
-- `POST /players/add`: Crea un nuevo jugador.
-- `GET /players/get/findAll`: Obtiene todos los jugadores.
-- `GET /players/get/getById/{id}`: Obtiene un jugador por su ID.
-- `GET /players/get/getByUsername/{username}`: Obtiene un jugador por su nombre de usuario.
-- `PUT /players/updatePlayer/{id}`: Actualiza un jugador.
-- `DELETE /players/delete/{id}`: Elimina un jugador. Solo los usuarios con el rol 'admin' pueden hacer esto.
-- `POST /players/dice/throw/{id}`: Un jugador lanza los dados.
-- `DELETE /players/dice/delete/{id}`: Elimina todos los lanzamientos de dados de un jugador.
-- `POST /players/roles/add/{playerId}/{rolename}`: Añade un rol a un jugador.
-
-
+- `POST /players/add`: Creates a new player.
+- `GET /players/get/findAll`: Gets all players.
+- `GET /players/get/getById/{id}`: Gets a player by their ID.
+- `GET /players/get/getByUsername/{username}`: Gets a player by their username.
+- `PUT /players/updatePlayer/{id}`: Updates a player.
+- `DELETE /players/delete/{id}`: Deletes a player. Only users with the 'admin' role can do this.
+- `POST /players/dice/throw/{id}`: A player throws the dice.
+- `DELETE /players/dice/delete/{id}`: Deletes all dice throws of a player.
+- `POST /players/roles/add/{playerId}/{rolename}`: Adds a role to a player.

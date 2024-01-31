@@ -65,11 +65,11 @@ public class PlayerController {
     public ResponseEntity<Player> updatePlayer(@RequestBody PlayerDto playerDTO,
                                                @PathVariable Long id){
 
-        String userNameAutenticated = userDetailsServiceImple.getAuthenticatedUsername();
+        Long idAutenticado = userDetailsServiceImple.getAuthenticatedUserId(id).getBody();
 
-        if (!userNameAutenticated.equalsIgnoreCase(playerDTO.getUsername())){
+        if (!idAutenticado.equals(id)){
 
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return new  ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
         return new ResponseEntity<>(playerService.updatePlayer(playerDTO, id), HttpStatus.OK);

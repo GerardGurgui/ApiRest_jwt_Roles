@@ -1,11 +1,13 @@
 package prueba14.sqldriver.gameUtilities;
 
+import org.springframework.stereotype.Component;
 import prueba14.sqldriver.entities.Dice;
 import prueba14.sqldriver.entities.Player;
 
+@Component
 public class GameUtilities {
 
-    public static Dice LaunchDice(){
+    public Dice LaunchDice(){
 
         Dice dice = new Dice();
         dice.setDado1(numRandom());
@@ -19,14 +21,14 @@ public class GameUtilities {
         return dice;
     }
 
-    public static int numRandom(){
+    public int numRandom(){
 
         int numero = (int) ((Math.random() * ((6 - 1) + 1)) + 1);
 
         return numero;
     }
 
-    public static boolean checkWinRound(int resultado){
+    public boolean checkWinRound(int resultado){
 
         boolean rondaGanada = false;
 
@@ -39,7 +41,7 @@ public class GameUtilities {
         return rondaGanada;
     }
 
-    public static boolean checkWinGame(int puntuacion){
+    public  boolean checkWinGame(int puntuacion){
 
         boolean ganadorPartida = false;
 
@@ -54,7 +56,7 @@ public class GameUtilities {
     /////PORCENTAJE-ESTADISTICAS
     //(TOTAL TIRADAS * LAS QUE HA GANADO / JUGADORES)*100
 
-    public static int checkAveragePlayer(Player player){
+    public int checkAveragePlayer(Player player){
 
         //puntuacion (cuantos 7 tiene)
         //el total de tiradas que ha realizado
@@ -67,17 +69,5 @@ public class GameUtilities {
 
     }
 
-//    public static int mostrarJugadorConMasPuntuacion(List<Player> players){
-//
-//        int puntuacion = 0;
-//
-//
-//        for (Player player : players) {
-//
-//
-//
-//        }
-//
-//    }
 
 }
