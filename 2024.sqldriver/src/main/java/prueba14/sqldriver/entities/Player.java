@@ -40,7 +40,6 @@ public class Player {
     @Column(name = "login_date")
     private LocalDate loginDate;
 
-    //Lazy para las peticiones que le pedimos y no todo lo relacionado
     @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JoinColumn(name = "id_player", referencedColumnName = "id")
     private Set<Dice> throwsDices;
@@ -64,6 +63,7 @@ public class Player {
         this.winner = winner;
     }
 
+    ///////TIRADAS DE DADOS
     public void addThrow(Dice tirada){
 
         if (throwsDices == null){
@@ -91,18 +91,16 @@ public class Player {
 
     public boolean hasRole(){
 
-        boolean hasRole = false;
+        return roles.stream()
+                .anyMatch(role -> role.getName().equalsIgnoreCase("USER")
+                || role.getName().equalsIgnoreCase("ADMIN"));
 
-        for (Roles role : roles) {
+    }
 
-            if (role.getName().equalsIgnoreCase("USER")
-                || role.getName().equalsIgnoreCase("ADMIN")){
+    public boolean isAdmin(){
 
-                hasRole = true;
-            }
-        }
-
-        return hasRole;
+        return roles.stream()
+                .anyMatch(role -> role.getName().equalsIgnoreCase("ADMIN"));
     }
 
 }

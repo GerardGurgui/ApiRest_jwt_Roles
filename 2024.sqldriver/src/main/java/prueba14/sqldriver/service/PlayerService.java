@@ -2,7 +2,6 @@ package prueba14.sqldriver.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import prueba14.sqldriver.DTO.PlayerDto;
 import prueba14.sqldriver.entities.Dice;
@@ -15,8 +14,9 @@ import prueba14.sqldriver.repository.DiceRepository;
 import prueba14.sqldriver.repository.PlayerRepository;
 import prueba14.sqldriver.repository.RolesRepository;
 
+import javax.management.relation.Role;
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 
 @Service
 public class PlayerService {
@@ -59,7 +59,7 @@ public class PlayerService {
                 .orElseThrow(() -> new PlayerNotFoundException(HttpStatus.NOT_FOUND, "Player not found"));
 
         //comprobar si existe el rol
-        Roles role = rolesRepository.findByName(rolename)
+        Roles role = rolesRepository.findRoleByName(rolename)
                 .orElseThrow(() -> new RolNotFoundException(HttpStatus.NOT_FOUND, "Role not found"));
 
         //comprobar si el admin ya está asignado a un usuario (solo puede haber un admin)
@@ -127,15 +127,25 @@ public class PlayerService {
 
     ////////DELETE
 
-    public void deletePlayer(Long id){
+    public void deletePlayer(Long idPlayer, Long idToDelete){
 
-        Player playerToDelete = getOnePlayerByID(id);
+        //buscar primero el jugador
+        Player playerIsAdmin = getOnePlayerByID(idPlayer);
+
+        //comprobar si es admin
+        boolean isAdmin = playerIsAdmin.isAdmin();
+
+        if (!isAdmin){
+
+            throw new RolNotFoundException(HttpStatus.NOT_FOUND, "this user is not an admin");
+        }
+
+        Player playerToDelete = getOnePlayerByID(idToDelete);
 
         playerRepository.delete(playerToDelete);
-
     }
 
-    /////FUNCIONALIDADES JUEGOS (TIRADAS DE DADOS, PORCENTAJES ETC)
+    /////FUNCIONALIDADES JUEGO (DADOS, PORCENTAJES)
 
     public Dice playerThrowDice(Long id){
 
@@ -153,18 +163,30 @@ public class PlayerService {
         return diceRepository.save(dice);
     }
 
-    public void deleteThrows(Long id){
+    public void deleteThrows(Long idPlayer,Long idToDeleteThrows){
 
-        Player player = getOnePlayerByID(id);
+        //buscar primero el jugador
+        Player player = getOnePlayerByID(idPlayer);
 
-        if (player.getThrowsDices().isEmpty()){
+        //comprobar si es admin
+        boolean isAdmin = player.isAdmin();
+
+        if (!isAdmin){
+
+            throw new RolNotFoundException(HttpStatus.NOT_FOUND, "this user is not an admin");
+        }
+
+        //buscar jugador a borrar tiradas
+        Player playerToDeleteThrows = getOnePlayerByID(idToDeleteThrows);
+
+        if (playerToDeleteThrows.getThrowsDices().isEmpty()){
 
             throw new PlayerNoDiceException(HttpStatus.NOT_FOUND,"This player don't have any dices throws");
         }
 
-        player.getThrowsDices().clear();
+        playerToDeleteThrows.getThrowsDices().clear();
 
-        playerRepository.save(player);
+        playerRepository.save(playerToDeleteThrows);
 
     }
 

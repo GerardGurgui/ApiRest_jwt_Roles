@@ -45,7 +45,6 @@ public class Map implements Imapper<PlayerDto, Player> {
     public Player mapUpdate(PlayerDto playerDto, Player playerToUpdate) {
 
 
-
         if (playerDto.getUsername() != null) {
 
             playerToUpdate.setUsername(playerDto.getUsername());

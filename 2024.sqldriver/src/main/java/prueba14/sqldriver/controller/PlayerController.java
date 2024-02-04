@@ -76,12 +76,14 @@ public class PlayerController {
 
     }
 
+    //solo el admin puede borrar jugadores por tanto decide que jugadores pueden ser borrados
+    //--> falta implementar
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/delete/{idAdmin}/{idToDelete}")
     @PreAuthorize("hasRole('ADMIN')")
-    public void deletePlayer(@PathVariable Long id){
+    public void deletePlayer(@PathVariable Long idAdmin, @PathVariable Long idToDelete){
 
-        playerService.deletePlayer(id);
+        playerService.deletePlayer(idAdmin, idToDelete);
     }
 
 
@@ -101,18 +103,18 @@ public class PlayerController {
         return ResponseEntity.ok(playerService.playerThrowDice(id));
     }
 
-    @DeleteMapping("/dice/delete/{id}")
-    public ResponseEntity<String> deleteThrows(@PathVariable Long id){
+    @DeleteMapping("/dice/delete/{idAdmin}/{idToDelete}")
+    public ResponseEntity<String> deleteThrows(@PathVariable Long idAdmin, @PathVariable Long idToDelete){
 
-        Long idAutenticado = userDetailsServiceImple.getAuthenticatedUserId(id).getBody();
+        Long idAutenticado = userDetailsServiceImple.getAuthenticatedUserId(idAdmin).getBody();
 
-        if (!idAutenticado.equals(id)){
+        if (!idAutenticado.equals(idAdmin)){
 
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
-        playerService.deleteThrows(id);
-        return new ResponseEntity<>("Throws deleted for player " +id, HttpStatus.ACCEPTED);
+        playerService.deleteThrows(idAdmin, idToDelete);
+        return new ResponseEntity<>("Throws deleted for player " +idToDelete, HttpStatus.ACCEPTED);
     }
 
     ////ROLES
