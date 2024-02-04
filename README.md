@@ -19,6 +19,10 @@ Players also have assigned roles, which can be 'user' or 'admin'.
 - Hibernate
 - Maven
 
+## Testing
+- JUnit
+- Mockito
+
 ## Security
 
 The application uses Spring Security for authentication and authorization. Users are stored in a database and JWT is used for authentication.
