@@ -14,9 +14,7 @@ import prueba14.sqldriver.repository.DiceRepository;
 import prueba14.sqldriver.repository.PlayerRepository;
 import prueba14.sqldriver.repository.RolesRepository;
 
-import javax.management.relation.Role;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class PlayerService {
@@ -39,14 +37,8 @@ public class PlayerService {
     public Player createPlayer(PlayerDto playerDto){
 
         //MAPEAR DE DTO A ENTIDAD (COMPROBAR NOMBRE VACÍO)
+        //COMPROBAR SI EXISTE EL USERNAME O EMAIL EN AUTHCONTROLLER REGISTER
         Player playerEntity = mapping.map(playerDto);
-
-        boolean playerExists = playerRepository.existsByUsername(playerDto.getUsername());
-
-        if (playerExists && !playerEntity.getUsername().equalsIgnoreCase("Anonimo")){
-
-            throw new ExistentUsernameException(HttpStatus.FOUND,"this username is already taken");
-        }
 
         return playerRepository.save(playerEntity);
 
@@ -137,7 +129,7 @@ public class PlayerService {
 
         if (!isAdmin){
 
-            throw new RolNotFoundException(HttpStatus.NOT_FOUND, "this user is not an admin");
+            throw new UserUnauthorizedException(HttpStatus.UNAUTHORIZED, "this user is not an admin");
         }
 
         Player playerToDelete = getOnePlayerByID(idToDelete);
@@ -181,7 +173,7 @@ public class PlayerService {
 
         if (playerToDeleteThrows.getThrowsDices().isEmpty()){
 
-            throw new PlayerNoDiceException(HttpStatus.NOT_FOUND,"This player don't have any dices throws");
+            throw new PlayerNoDiceThrowsException(HttpStatus.NOT_FOUND,"This player don't have any dices throws");
         }
 
         playerToDeleteThrows.getThrowsDices().clear();

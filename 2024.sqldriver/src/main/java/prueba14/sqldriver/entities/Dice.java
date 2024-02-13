@@ -8,15 +8,18 @@ import lombok.Setter;
 @Setter
 
 @Entity
-@Table(name = "RegistroTiradas")
+@Table(name = "registro_tiradas")
 public class Dice {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private int dado1;
-    private int dado2;
-    private int resultadoTirada;
+    private Integer dado1 = 0;
+    private Integer dado2 = 0;
+    private Integer resultadoTirada = 0;
+
+    @Column(name = "id_player")
+    private Long idPlayer;
 
     public Dice() {
     }

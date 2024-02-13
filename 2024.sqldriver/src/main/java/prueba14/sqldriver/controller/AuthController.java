@@ -17,19 +17,15 @@ import prueba14.sqldriver.security.payload.JwtResponse;
 import prueba14.sqldriver.security.payload.MessageResponse;
 import prueba14.sqldriver.service.PlayerService;
 
+import javax.validation.Valid;
 
 
 /**
  * Controlador para llevar a cabo la autenticación utilizando JWT
- *
  * Se utiliza AuthenticationManager para autenticar las credenciales que son el
  * usuario y password que llegan por POST en el cuerpo de la petición
- *
  * Si las credenciales son válidas se genera un token JWT como respuesta
- *
- * ADAPTAR REGISTRO Y LOGIN A LA ENTIDAD DE JUGADORES, SE REGISTRAN Y LOGIN PARA PODER JUGAR CON LA COOKIE GENERADA
  */
-
 // @CrossOrigin(origins = "http://localhost:8081")
 
 @RestController
@@ -60,18 +56,18 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<MessageResponse> register(@RequestBody PlayerDto playerDto) {
+    public ResponseEntity<MessageResponse> register(@Valid @RequestBody PlayerDto playerDto) {
 
         if (playerRepository.existsByUsername(playerDto.getUsername())) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: Username is already taken!"));
+                    .body(new MessageResponse("Error: Username is already taken"));
         }
 
         if (playerRepository.existsByEmail(playerDto.getEmail())) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Error: Email is already in use!"));
+                    .body(new MessageResponse("Error: Email is already in use"));
         }
 
         playerService.createPlayer(playerDto);

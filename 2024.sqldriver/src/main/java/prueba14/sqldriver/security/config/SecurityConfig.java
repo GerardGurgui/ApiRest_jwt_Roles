@@ -75,7 +75,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // Cross-Site Request Forgery CSRF
         // CORS (Cross-origin resource sharing)
         //desactivar cross-cheking, error 403 con metodos POST
-        http.cors().and().csrf().disable()
+        http.cors()
+                .and()
+                .csrf()
+                .disable()
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler)
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -83,7 +86,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/api/auth/**").permitAll()
                 .antMatchers("/players/get/**").permitAll()
-                .antMatchers("/players/roles/**").permitAll() //TEMPORAL PARA PRUEBAS, LUEGO SOLO ADMIN DECIDE?
+                .antMatchers("/players/roles/**").permitAll() //TEMPORAL PARA PRUEBAS, LUEGO SOLO ADMIN DECIDE
                 .antMatchers("/v2/api-docs", "/configuration/**", "/swagger*/**", "/webjars/**").permitAll()
                 .anyRequest().authenticated();
 

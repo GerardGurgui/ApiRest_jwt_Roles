@@ -1,6 +1,7 @@
 package prueba14.sqldriver.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,6 +13,7 @@ import prueba14.sqldriver.entities.Roles;
 import prueba14.sqldriver.security.service.UserDetailsServiceImple;
 import prueba14.sqldriver.service.PlayerService;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -24,23 +26,6 @@ public class PlayerController {
     @Autowired
     private UserDetailsServiceImple userDetailsServiceImple;
 
-    ////----> CRUD
-
-    //--> CREATE
-
-    @PostMapping("/add")
-    public ResponseEntity<Player> addPlayer(@RequestBody PlayerDto jugadorDTO){
-
-        String userNameAutenticated = userDetailsServiceImple.getAuthenticatedUsername();
-
-        if (!userNameAutenticated.equalsIgnoreCase(jugadorDTO.getUsername())){
-
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-
-        return new ResponseEntity<>(playerService.createPlayer(jugadorDTO), HttpStatus.CREATED);
-
-    }
 
     @GetMapping("/get/findAll")
     public ResponseEntity<List<Player>> findAllPlayers(){
@@ -62,22 +47,18 @@ public class PlayerController {
     }
 
     @PutMapping("/updatePlayer/{id}")
-    public ResponseEntity<Player> updatePlayer(@RequestBody PlayerDto playerDTO,
+    public ResponseEntity<Player> updatePlayer(@Valid @RequestBody PlayerDto playerDTO,
                                                @PathVariable Long id){
 
         Long idAutenticado = userDetailsServiceImple.getAuthenticatedUserId(id).getBody();
 
-        if (!idAutenticado.equals(id)){
-
-            return new  ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        if (idAutenticado == null || !idAutenticado.equals(id)){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
         return new ResponseEntity<>(playerService.updatePlayer(playerDTO, id), HttpStatus.OK);
 
     }
-
-    //solo el admin puede borrar jugadores por tanto decide que jugadores pueden ser borrados
-    //--> falta implementar
 
     @DeleteMapping("/delete/{idAdmin}/{idToDelete}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -95,9 +76,8 @@ public class PlayerController {
 
         Long idAutenticado = userDetailsServiceImple.getAuthenticatedUserId(id).getBody();
 
-        if (!idAutenticado.equals(id)){
-
-            return new  ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        if (idAutenticado == null || !idAutenticado.equals(id)){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
         return ResponseEntity.ok(playerService.playerThrowDice(id));
@@ -108,8 +88,7 @@ public class PlayerController {
 
         Long idAutenticado = userDetailsServiceImple.getAuthenticatedUserId(idAdmin).getBody();
 
-        if (!idAutenticado.equals(idAdmin)){
-
+        if (idAutenticado == null || !idAutenticado.equals(idAdmin)){
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 

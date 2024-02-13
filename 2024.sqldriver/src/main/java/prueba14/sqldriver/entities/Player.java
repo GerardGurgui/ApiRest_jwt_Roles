@@ -31,11 +31,11 @@ public class Player {
     @JsonIgnore
     private String password;
 
-    private int puntuacion;
-    private int winner;
+    private Integer puntuacion = 0;
+    private Integer winner = 0;
 
     @Column(name = "porcentaje_acierto")
-    private int acierto;
+    private Integer acierto = 0;
 
     @Column(name = "login_date")
     private LocalDate loginDate;
@@ -50,6 +50,7 @@ public class Player {
             inverseJoinColumns = @JoinColumn(name = "id_role", referencedColumnName = "id"))
     @JsonManagedReference // manejar serializacion de los jugadores y no entrar en bucle
     private Set<Roles> roles;
+
 
     public Player() {
     }

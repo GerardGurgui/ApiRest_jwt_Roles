@@ -123,7 +123,6 @@ public class PlayerServiceTest {
     public void createPlayerTest(){
 
         when(mapping.map(playerDtoTest)).thenReturn(playerTest);
-        when(playerRepository.existsByUsername(playerDtoTest.getUsername())).thenReturn(false);
         when(playerRepository.save(any(Player.class))).thenReturn(playerTest);
 
         Player playerResult = playerService.createPlayer(playerDtoTest);
@@ -273,6 +272,8 @@ public class PlayerServiceTest {
         verify(diceRepository).save(diceTest);
 
     }
+
+    //FALTA ELIMINAR TIRADAS
 
 
 }
