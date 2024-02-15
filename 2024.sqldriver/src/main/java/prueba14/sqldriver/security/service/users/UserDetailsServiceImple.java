@@ -1,13 +1,14 @@
-package prueba14.sqldriver.security.service;
+package prueba14.sqldriver.security.service.users;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import prueba14.sqldriver.entities.Player;
 import prueba14.sqldriver.repository.PlayerRepository;
@@ -17,6 +18,7 @@ import prueba14.sqldriver.security.roles.RoleGrantedAuthority;
 import prueba14.sqldriver.security.user.CustomUserDetails;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,17 +48,20 @@ public class UserDetailsServiceImple implements UserDetailsService {
         Player player = playerRepository.getPlayerByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User " + username + " not found"));
 
-        //asignamos roles al usuario
-         List<GrantedAuthority> roles = player.getRoles().stream()
-                .map(role -> new RoleGrantedAuthority((role.getName())))
-                .collect(Collectors.toList());
-
+        //asignamos el rol de usuario y el permiso de lectura
         return new CustomUserDetails(
                 player.getUsername(),
                 player.getPassword(),
-                new ArrayList<>(),
+                getAdminAuthorities(),
                 player.getId()
         );
+    }
+
+    private Collection<? extends GrantedAuthority> getAdminAuthorities() {
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        authorities.add(new SimpleGrantedAuthority("READ"));
+        return authorities;
     }
 
 

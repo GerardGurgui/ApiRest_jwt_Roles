@@ -1,17 +1,18 @@
 package prueba14.sqldriver.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
 import prueba14.sqldriver.DTO.PlayerDto;
 import prueba14.sqldriver.repository.PlayerRepository;
+import prueba14.sqldriver.security.jwt.admin.JwtAdminTokenUtil;
 import prueba14.sqldriver.security.jwt.JwtTokenUtil;
 import prueba14.sqldriver.security.payload.JwtResponse;
 import prueba14.sqldriver.security.payload.MessageResponse;
@@ -42,6 +43,27 @@ public class AuthController {
 
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
+
+    @Autowired
+    private JwtAdminTokenUtil jwtAdminTokenUtil;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @PostMapping("/login/admin")
+    public ResponseEntity<JwtResponse> loginAdmin(@RequestBody PlayerDto playerDTO){
+
+        if (!playerDTO.getUsername().equals("admin")
+            || !passwordEncoder.matches(playerDTO.getPassword(),passwordEncoder.encode("admin"))){
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String jwtAdmin = jwtAdminTokenUtil.generateTokenForAdmin();
+
+        return ResponseEntity.ok(new JwtResponse(jwtAdmin));
+
+    }
 
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@RequestBody PlayerDto playerDTO){
@@ -74,4 +96,6 @@ public class AuthController {
 
         return ResponseEntity.ok(new MessageResponse("Player registered successfully!"));
     }
+
+
 }

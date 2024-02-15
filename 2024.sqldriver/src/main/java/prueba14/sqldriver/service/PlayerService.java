@@ -15,6 +15,7 @@ import prueba14.sqldriver.repository.PlayerRepository;
 import prueba14.sqldriver.repository.RolesRepository;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class PlayerService {
@@ -44,10 +45,10 @@ public class PlayerService {
 
     }
 
-    public void addRoleToPlayer(String rolename, Long playerId){
+    public void addRoleToPlayer(String rolename, Long playerid){
 
         //comprobar si existe el jugador
-        Player player = playerRepository.findById(playerId)
+        Player player = playerRepository.findById(playerid)
                 .orElseThrow(() -> new PlayerNotFoundException(HttpStatus.NOT_FOUND, "Player not found"));
 
         //comprobar si existe el rol
@@ -119,18 +120,7 @@ public class PlayerService {
 
     ////////DELETE
 
-    public void deletePlayer(Long idPlayer, Long idToDelete){
-
-        //buscar primero el jugador
-        Player playerIsAdmin = getOnePlayerByID(idPlayer);
-
-        //comprobar si es admin
-        boolean isAdmin = playerIsAdmin.isAdmin();
-
-        if (!isAdmin){
-
-            throw new UserUnauthorizedException(HttpStatus.UNAUTHORIZED, "this user is not an admin");
-        }
+    public void deletePlayer(Long idToDelete){
 
         Player playerToDelete = getOnePlayerByID(idToDelete);
 
@@ -138,6 +128,18 @@ public class PlayerService {
     }
 
     /////FUNCIONALIDADES JUEGO (DADOS, PORCENTAJES)
+
+    public Set<Dice> getThrows(Long id){
+
+        Player player = getOnePlayerByID(id);
+
+        if (player.getThrowsDices().isEmpty()){
+
+            throw new PlayerNoDiceThrowsException(HttpStatus.NOT_FOUND, "This player don't have any dices throws");
+        }
+
+        return player.getThrowsDices();
+    }
 
     public Dice playerThrowDice(Long id){
 
@@ -165,18 +167,15 @@ public class PlayerService {
 
         if (!isAdmin){
 
-            throw new RolNotFoundException(HttpStatus.NOT_FOUND, "this user is not an admin");
+            throw new UserUnauthorizedException(HttpStatus.UNAUTHORIZED, "this user is not an admin");
         }
 
         //buscar jugador a borrar tiradas
         Player playerToDeleteThrows = getOnePlayerByID(idToDeleteThrows);
 
-        if (playerToDeleteThrows.getThrowsDices().isEmpty()){
+        Set<Dice> throwsDices = playerToDeleteThrows.getThrowsDices();
 
-            throw new PlayerNoDiceThrowsException(HttpStatus.NOT_FOUND,"This player don't have any dices throws");
-        }
-
-        playerToDeleteThrows.getThrowsDices().clear();
+        playerToDeleteThrows.getThrowsDices().removeAll(throwsDices);
 
         playerRepository.save(playerToDeleteThrows);
 

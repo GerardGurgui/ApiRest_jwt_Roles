@@ -14,9 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
-import prueba14.sqldriver.entities.Player;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -36,6 +34,7 @@ public class PlayerControllerTest {
 
     private final String CONTROLLER_BASE_URL = "/players";
     private final String CONTROLLER_AUTH_URL = "/api/auth";
+    private final String CONTROLLER_ROLES_URL = "/roles";
 
     private String token;
 
@@ -93,6 +92,7 @@ public class PlayerControllerTest {
                 .andExpect(jsonPath("$.username").value("player2"));
     }
 
+    /////////PUT
 
     @Test
     @Transactional //evita que se realicen cambios en la base de datos
@@ -129,6 +129,8 @@ public class PlayerControllerTest {
 
     }
 
+    /////////DELETE
+
     @Test
     @Transactional
     public void deletePlayerTest() throws Exception {
@@ -155,6 +157,100 @@ public class PlayerControllerTest {
                 .andDo(print());
     }
 
+    @Test
+    @Transactional
+    public void deleteThrowsTest() throws Exception {
 
+        token = authenticate("playerAdmin", "playerAdmin");
+
+        String url = CONTROLLER_BASE_URL + "/dice/delete/4/1";
+
+        mockMvc.perform(delete(url)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isAccepted())
+                .andDo(print());
+
+
+        //comprobar que solamente el admin puede eliminar las tiradas de un usuario
+
+        token = authenticate("player2", "password2");
+
+        String urlNotAuthorized = CONTROLLER_BASE_URL + "/dice/delete/2/3";
+
+        mockMvc.perform(delete(urlNotAuthorized)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isUnauthorized())
+                .andDo(print());
+    }
+
+    /////////DADOS
+
+    @Test
+    @Transactional
+    public void playerThrowDiceTest() throws Exception {
+
+        token = authenticate("player1", "password1");
+
+        String url = CONTROLLER_BASE_URL + "/dice/throw/1";
+
+        mockMvc.perform(post(url)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+
+        //comprobar que se ha registrado la tirada en el jugador
+
+        String urlGetPlayerThrows = CONTROLLER_BASE_URL + "/dice/get/1";
+
+        MvcResult result = mockMvc.perform(get(urlGetPlayerThrows)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andReturn();
+
+        String responseContent = result.getResponse().getContentAsString();
+
+        Assertions.assertFalse(responseContent.isEmpty());
+
+        //comprobar que un usuario no puede lanzar los dados de otro usuario
+
+        token = authenticate("player2", "password2");
+
+        String urlNotAuthorized = CONTROLLER_BASE_URL + "/dice/throw/1";
+
+        mockMvc.perform(post(urlNotAuthorized)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isUnauthorized())
+                .andDo(print());
+    }
+
+    ////////ROLES
+
+    @Test
+    @Transactional
+    public void addRoleTest() throws Exception {
+
+        token = authenticate("playerAdmin", "playerAdmin");
+
+        String url = CONTROLLER_ROLES_URL + "/add/1/user";
+
+        mockMvc.perform(post(url)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        //comprobar que un usuario no puede añadir un rol a otro usuario
+
+//        token = authenticate("player2", "password2");
+//
+//        String urlNotAuthorized = CONTROLLER_ROLES_URL + "/add/2/3";
+//
+//        mockMvc.perform(post(urlNotAuthorized)
+//                        .header("Authorization", "Bearer " + token))
+//                .andExpect(status().isUnauthorized())
+//                .andDo(print());
+
+    }
 
 }

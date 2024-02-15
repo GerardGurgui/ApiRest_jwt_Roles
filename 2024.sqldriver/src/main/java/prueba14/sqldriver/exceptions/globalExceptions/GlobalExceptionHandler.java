@@ -2,6 +2,7 @@ package prueba14.sqldriver.exceptions.globalExceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -137,6 +138,20 @@ public class GlobalExceptionHandler {
         errorDetails.setErrors(errors);
 
         return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException ex) {
+
+        List<String> errors = new ArrayList<>();
+        errors.add(ex.getMessage());
+
+        ErrorDetails errorDetails = new ErrorDetails();
+        errorDetails.setTimestamp(new Date());
+        errorDetails.setMessage("Access Denied");
+        errorDetails.setErrors(errors);
+
+        return new ResponseEntity<>(errorDetails, HttpStatus.FORBIDDEN);
     }
 
     //DICE--> PLAYER NO DICE THROWS EXCEPTION

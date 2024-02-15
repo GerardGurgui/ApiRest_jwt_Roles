@@ -17,4 +17,5 @@ public class CustomUserDetails extends User {
         super(username, password, authorities);
         this.id = id;
     }
+
 }

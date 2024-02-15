@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -17,21 +18,32 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import prueba14.sqldriver.security.jwt.JwtAuthEntryPoint;
 import prueba14.sqldriver.security.jwt.JwtRequestFilter;
-import prueba14.sqldriver.security.service.UserDetailsServiceImple;
+import prueba14.sqldriver.security.jwt.admin.JwtAdminRequestFilter;
+import prueba14.sqldriver.security.service.admin.AdminDetailsServiceImpl;
+import prueba14.sqldriver.security.service.users.UserDetailsServiceImple;
 
 import java.util.List;
 
 @Configuration
 @EnableWebSecurity // permite a Spring aplicar esta configuracion a la configuraicon de seguridad global
+@EnableGlobalMethodSecurity(prePostEnabled = true) // habilita la seguridad a nivel de metodo con @PreAuthorize
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private UserDetailsServiceImple userDetailsService;
 
     @Autowired
+    private AdminDetailsServiceImpl adminDetailsService;
+
+    @Autowired
     private JwtAuthEntryPoint unauthorizedHandler;
 
-    // ================ CREACIÓN DE BEANS ======================
+    // CREACIÓN DE BEANS
+    @Bean
+    public JwtAdminRequestFilter authenticationJwtAdminTokenFilter() {
+        return new JwtAdminRequestFilter();
+    }
+
     @Bean
     public JwtRequestFilter authenticationJwtTokenFilter() {
         return new JwtRequestFilter();
@@ -48,7 +60,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
-    /**
+    /*
      * Configuracion global de CORS para toda la aplicacion
      */
     @Bean
@@ -67,7 +79,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     // ============ SOBREESCRIBIR FUNCIONALIDAD SECURITY POR DEFECTO ======
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
+
         auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+
     }
 
     @Override
@@ -79,18 +93,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .csrf()
                 .disable()
-                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler)
+                .exceptionHandling()
+                .authenticationEntryPoint(unauthorizedHandler)
                 .and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
                 .antMatchers("/api/auth/**").permitAll()
                 .antMatchers("/players/get/**").permitAll()
-                .antMatchers("/players/roles/**").permitAll() //TEMPORAL PARA PRUEBAS, LUEGO SOLO ADMIN DECIDE
+                .antMatchers("/players/dice/get/**").permitAll()
+                .antMatchers("/players/delete/**").hasRole("ADMIN")
                 .antMatchers("/v2/api-docs", "/configuration/**", "/swagger*/**", "/webjars/**").permitAll()
-                .anyRequest().authenticated();
+                .anyRequest().authenticated()
+                .and()
+                //añadir filtro para validar el token en cada petición
+                .addFilterBefore(authenticationJwtAdminTokenFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
-        //añadir filtro para validar el token en cada petición
-        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+
     }
+
+
 }
