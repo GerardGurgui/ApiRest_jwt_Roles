@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import prueba14.sqldriver.DTO.PlayerDto;
 import prueba14.sqldriver.entities.Dice;
 import prueba14.sqldriver.entities.Player;
-import prueba14.sqldriver.security.service.users.UserDetailsServiceImple;
+import prueba14.sqldriver.security.service.UserDetailsServiceImple;
 import prueba14.sqldriver.service.PlayerService;
 
 import javax.validation.Valid;
@@ -60,8 +60,6 @@ public class PlayerController {
         return new ResponseEntity<>(playerService.updatePlayer(playerDTO, id), HttpStatus.OK);
 
     }
-
-    /////FALTAAAA NO QUIERO TENER QUE PASAR EL ID DEL ADMIN
 
     @DeleteMapping("/delete/{idToDelete}")
     @PreAuthorize("hasRole('ADMIN')")

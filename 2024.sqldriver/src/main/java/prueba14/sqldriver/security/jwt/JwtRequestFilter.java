@@ -13,15 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import prueba14.sqldriver.security.service.users.UserDetailsServiceImple;
+import prueba14.sqldriver.security.service.UserDetailsServiceImple;
 
 
 /**
- * Filters incoming requests and installs a Spring Security principal if a header corresponding to a valid user is
- * found.
  * Se ejecuta por cada petición entrante con el fin de validar el token JWT
  * en caso de que lo sea se añade al contexto para indicar que un usuario está autenticado
  */
@@ -33,7 +32,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     public static final String BEARER = "Bearer ";
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
-
     @Autowired
     private UserDetailsServiceImple userDetailsService;
 

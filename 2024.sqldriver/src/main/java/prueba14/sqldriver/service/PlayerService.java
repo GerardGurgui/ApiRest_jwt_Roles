@@ -14,6 +14,7 @@ import prueba14.sqldriver.repository.DiceRepository;
 import prueba14.sqldriver.repository.PlayerRepository;
 import prueba14.sqldriver.repository.RolesRepository;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -37,9 +38,14 @@ public class PlayerService {
     ////////CREATE
     public Player createPlayer(PlayerDto playerDto){
 
-        //MAPEAR DE DTO A ENTIDAD (COMPROBAR NOMBRE VACÍO)
-        //COMPROBAR SI EXISTE EL USERNAME O EMAIL EN AUTHCONTROLLER REGISTER
+        //MAPEAR DE DTO A ENTIDAD
         Player playerEntity = mapping.map(playerDto);
+
+        //añadir rol USER
+        Set<Roles> roles = new HashSet<>();
+        roles.add(rolesRepository.findRoleByName("USER").get());
+
+        playerEntity.setRoles(roles);
 
         return playerRepository.save(playerEntity);
 
@@ -55,14 +61,9 @@ public class PlayerService {
         Roles role = rolesRepository.findRoleByName(rolename)
                 .orElseThrow(() -> new RolNotFoundException(HttpStatus.NOT_FOUND, "Role not found"));
 
-        //comprobar si el admin ya está asignado a un usuario (solo puede haber un admin)
-        if (rolename.equalsIgnoreCase("admin") && rolesRepository.existsByRoleName("admin")) {
-
-            throw new AdminAlreadyExistsException(HttpStatus.CONFLICT, "admin already exists");
-        }
-
         player.addRole(role);
         playerRepository.save(player);
+
     }
 
     ////////READ

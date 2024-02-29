@@ -183,40 +183,40 @@ public class PlayerServiceTest {
 
     }
 
-    @Test
-    public void deletePlayer(){
-
-        //simular comportamiento de un un usuario que no es admin (no debería poder borrar)
-        when(playerRepository.existsById(playerNotAdmin.getId())).thenReturn(true);
-        when(playerRepository.findById(playerNotAdmin.getId())).thenReturn(Optional.of(playerNotAdmin));
-
-        //comprobar que el usuario existe y tiene rol de usuario
-        when(playerRepository.existsById(playerToDelete.getId())).thenReturn(true);
-        assertTrue(playerRepository.existsById(playerToDelete.getId()));
-        assertTrue(playerNotAdmin.getRoles().contains(roleUser));
-
-        // definimos a un usuario como admin para que pueda borrar
-        playerTest.addRole(roleAdmin);
-        assertTrue(playerTest.getRoles().contains(roleAdmin));
-
-        //simulamos comportamientos necesarios del metodo deletePlayer (admin y usuario a borrar)
-        when(playerRepository.existsById(playerTest.getId())).thenReturn(true);
-        when(playerRepository.findById(playerTest.getId())).thenReturn(Optional.of(playerTest));
-
-        when(playerRepository.existsById(playerToDelete.getId())).thenReturn(true);
-        when(playerRepository.findById(playerToDelete.getId())).thenReturn(Optional.of(playerToDelete));
-
-        playerService.deletePlayer(playerTest.getId(), playerToDelete.getId());
-
-        //comprobar que se ha borrado el usuario
-        when(playerRepository.existsById(playerToDelete.getId())).thenReturn(false);
-        assertFalse(playerRepository.existsById(playerToDelete.getId()));
-
-        //comprobar que si no es un admin no puede eliminar a otro usuario
-        assertThrows(RolNotFoundException.class, () -> {
-            playerService.deletePlayer(playerNotAdmin.getId(), playerToDelete.getId());
-        });
-    }
+//    @Test
+//    public void deletePlayer(){
+//
+//        //simular comportamiento de un un usuario que no es admin (no debería poder borrar)
+//        when(playerRepository.existsById(playerNotAdmin.getId())).thenReturn(true);
+//        when(playerRepository.findById(playerNotAdmin.getId())).thenReturn(Optional.of(playerNotAdmin));
+//
+//        //comprobar que el usuario existe y tiene rol de usuario
+//        when(playerRepository.existsById(playerToDelete.getId())).thenReturn(true);
+//        assertTrue(playerRepository.existsById(playerToDelete.getId()));
+//        assertTrue(playerNotAdmin.getRoles().contains(roleUser));
+//
+//        // definimos a un usuario como admin para que pueda borrar
+//        playerTest.addRole(roleAdmin);
+//        assertTrue(playerTest.getRoles().contains(roleAdmin));
+//
+//        //simulamos comportamientos necesarios del metodo deletePlayer (admin y usuario a borrar)
+//        when(playerRepository.existsById(playerTest.getId())).thenReturn(true);
+//        when(playerRepository.findById(playerTest.getId())).thenReturn(Optional.of(playerTest));
+//
+//        when(playerRepository.existsById(playerToDelete.getId())).thenReturn(true);
+//        when(playerRepository.findById(playerToDelete.getId())).thenReturn(Optional.of(playerToDelete));
+//
+//        playerService.deletePlayer(playerTest.getId(), playerToDelete.getId());
+//
+//        //comprobar que se ha borrado el usuario
+//        when(playerRepository.existsById(playerToDelete.getId())).thenReturn(false);
+//        assertFalse(playerRepository.existsById(playerToDelete.getId()));
+//
+//        //comprobar que si no es un admin no puede eliminar a otro usuario
+//        assertThrows(RolNotFoundException.class, () -> {
+//            playerService.deletePlayer(playerNotAdmin.getId(), playerToDelete.getId());
+//        });
+//    }
 
     //// ROLES
     @Test

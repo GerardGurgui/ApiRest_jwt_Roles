@@ -46,18 +46,14 @@ public class JwtTokenUtil {
     }
 
     //check if the token has expired
-    private Boolean isTokenExpired(String token) {
+    public Boolean isTokenExpired(String token) {
         final Date expiration = getExpirationDateFromToken(token);
         return expiration.before(new Date());
     }
 
-    //generate token for user
     public String generateToken(Authentication authentication){
 
         UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
-
-        // Necesitas obtener el ID del usuario de alguna manera. Esto dependerá de tu implementación de UserDetails.
-        // Supongamos que tienes un método getUserId() en tu implementación de UserDetails.
         Long userId = ((CustomUserDetails) userPrincipal).getId();
 
         return Jwts.builder()

@@ -1,27 +1,42 @@
 package prueba14.sqldriver.security.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import prueba14.sqldriver.security.jwt.JwtAuthEntryPoint;
 import prueba14.sqldriver.security.jwt.JwtRequestFilter;
-import prueba14.sqldriver.security.jwt.admin.JwtAdminRequestFilter;
-import prueba14.sqldriver.security.service.admin.AdminDetailsServiceImpl;
-import prueba14.sqldriver.security.service.users.UserDetailsServiceImple;
+import prueba14.sqldriver.security.service.UserDetailsServiceImple;
+import prueba14.sqldriver.security.user.CustomUserDetails;
+import prueba14.sqldriver.service.AdminService;
 
+import javax.sql.DataSource;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Configuration
@@ -29,20 +44,15 @@ import java.util.List;
 @EnableGlobalMethodSecurity(prePostEnabled = true) // habilita la seguridad a nivel de metodo con @PreAuthorize
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private UserDetailsServiceImple userDetailsService;
-
-    @Autowired
-    private AdminDetailsServiceImpl adminDetailsService;
 
     @Autowired
     private JwtAuthEntryPoint unauthorizedHandler;
 
-    // CREACIÓN DE BEANS
-    @Bean
-    public JwtAdminRequestFilter authenticationJwtAdminTokenFilter() {
-        return new JwtAdminRequestFilter();
-    }
+    @Autowired
+    private UserDetailsServiceImple userDetailsService;
+
+    @Autowired
+    private CustomUserDetails superAdmin;
 
     @Bean
     public JwtRequestFilter authenticationJwtTokenFilter() {
@@ -78,10 +88,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     // ============ SOBREESCRIBIR FUNCIONALIDAD SECURITY POR DEFECTO ======
     @Override
-    public void configure(AuthenticationManagerBuilder auth) throws Exception {
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 
+        // Configuración con UserDetailsService
         auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
 
+//        // Configuración en memoria
+        auth.inMemoryAuthentication()
+                .withUser(superAdmin);
     }
 
     @Override
@@ -105,13 +119,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/players/dice/get/**").permitAll()
                 .antMatchers("/players/delete/**").hasRole("ADMIN")
                 .antMatchers("/v2/api-docs", "/configuration/**", "/swagger*/**", "/webjars/**").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest()
+                .authenticated()
                 .and()
                 //añadir filtro para validar el token en cada petición
-                .addFilterBefore(authenticationJwtAdminTokenFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-
-
     }
 
 

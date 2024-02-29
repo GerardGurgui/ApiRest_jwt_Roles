@@ -1,26 +1,23 @@
-package prueba14.sqldriver.security.service.users;
+package prueba14.sqldriver.security.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.*;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import prueba14.sqldriver.entities.Player;
 import prueba14.sqldriver.repository.PlayerRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import prueba14.sqldriver.security.roles.RoleGrantedAuthority;
 import prueba14.sqldriver.security.user.CustomUserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Autentica un usuario de la base de datos
@@ -33,34 +30,68 @@ import java.util.stream.Collectors;
 @Service
 public class UserDetailsServiceImple implements UserDetailsService {
 
+
     @Autowired
     private PlayerRepository playerRepository;
 
-    /*
-     * Se añade la ruta de la clase User, ya que en este metodo no puede haber 2 clases iguales con spring
-     * se interactura con nuestra bases de datos para usuarios, con el repositorio
-     * */
+    @Autowired
+    private AuthenticationManagerBuilder authenticationManagerBuilder;
+
+    @Autowired
+    private CustomUserDetails superAdmin;
+
+
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        //obtener el usuario de la base de datos usando el metodo que lo verifica
-        Player player = playerRepository.getPlayerByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User " + username + " not found"));
+        // Usuario en memoria
+        if (superAdmin.getUsername().equals(username)) {
 
-        //asignamos el rol de usuario y el permiso de lectura
-        return new CustomUserDetails(
-                player.getUsername(),
-                player.getPassword(),
-                getAdminAuthorities(),
-                player.getId()
-        );
+            return superAdmin;
+
+        } else {
+
+            // NO SE SI ES CORRECTO ASIGNAR ROL AQUI.. YA QUE CADA VEZ QUE HACE LOGIN SE ASIGNA EL ROL DE NUEVO?
+            // Usuario en la base de datos
+            Player player = playerRepository.getPlayerByUsername(username)
+                    .orElseThrow(() -> new UsernameNotFoundException("User " + username + " not found"));
+
+            Collection<? extends GrantedAuthority> authorities = getAuthorities(player);
+
+            return new CustomUserDetails(
+                    player.getUsername(),
+                    player.getPassword(),
+                    authorities,
+                    player.getId()
+            );
+        }
     }
 
-    private Collection<? extends GrantedAuthority> getAdminAuthorities() {
+
+    //asigna roles dependiendo de si el usuario es admin o no
+    //FALTA REVISAR CON LA IMPLEMENTACION DEL USUARIO SUPERADMIN NO SE SI NECESITO ESTE ROL ADMIN AQUI
+    private Collection<? extends GrantedAuthority> getAuthorities(Player player) {
+
+        if (player.isAdmin()){
+            return getAdminAuthorities();
+        } else {
+            return getUserAuthorities();
+        }
+    }
+
+    private Collection<? extends GrantedAuthority> getUserAuthorities() {
+
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
         authorities.add(new SimpleGrantedAuthority("READ"));
+        return authorities;
+    }
+
+    private Collection<? extends GrantedAuthority> getAdminAuthorities() {
+
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
         return authorities;
     }
 
@@ -88,4 +119,5 @@ public class UserDetailsServiceImple implements UserDetailsService {
 
         return new ResponseEntity<>(userDetails.getId(), HttpStatus.OK);
     }
+
 }

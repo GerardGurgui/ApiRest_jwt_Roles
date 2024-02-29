@@ -18,8 +18,8 @@ import java.util.Set;
 
 @Getter
 @Setter
-@Table(name = "Players")
 @Entity
+@Table(name = "Players")
 public class Player {
 
     @Id
