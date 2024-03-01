@@ -51,21 +51,6 @@ public class PlayerService {
 
     }
 
-    public void addRoleToPlayer(String rolename, Long playerid){
-
-        //comprobar si existe el jugador
-        Player player = playerRepository.findById(playerid)
-                .orElseThrow(() -> new PlayerNotFoundException(HttpStatus.NOT_FOUND, "Player not found"));
-
-        //comprobar si existe el rol
-        Roles role = rolesRepository.findRoleByName(rolename)
-                .orElseThrow(() -> new RolNotFoundException(HttpStatus.NOT_FOUND, "Role not found"));
-
-        player.addRole(role);
-        playerRepository.save(player);
-
-    }
-
     ////////READ
 
     public List<Player> findAllPlayers(){

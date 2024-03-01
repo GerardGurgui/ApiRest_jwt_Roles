@@ -30,14 +30,9 @@ public class AdminConfig {
         return new CustomUserDetails(
                 username,
                 new BCryptPasswordEncoder().encode(password),
-                getAdminAuthorities(),
+                List.of(new SimpleGrantedAuthority("ROLE_ADMIN")),
                 1L
         );
     }
 
-    private Collection<? extends GrantedAuthority> getAdminAuthorities() {
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-        return authorities;
-    }
 }

@@ -41,17 +41,6 @@ public class AuthService {
         return new JwtResponse(jwt);
     }
 
-    //UNIR LOS 2 EN UN SOLO REGISTRO??
-    public ResponseEntity<MessageResponse> registerAdmin(PlayerDto playerDto) {
-
-        checkUserNameAndEmail(playerDto);
-
-        adminService.createAdmin(playerDto);
-
-        return ResponseEntity.ok(new MessageResponse("Admin registered successfully!"));
-    }
-
-
     public ResponseEntity<MessageResponse> register(PlayerDto playerDto) {
 
         checkUserNameAndEmail(playerDto);

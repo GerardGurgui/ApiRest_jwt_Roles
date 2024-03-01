@@ -91,6 +91,7 @@ public class PlayerController {
         return ResponseEntity.ok(playerService.getThrows(id));
     }
 
+    //FALTAAAA
     @DeleteMapping("/dice/delete/{idAdmin}/{idToDelete}")
     public ResponseEntity<String> deleteThrows(@PathVariable Long idAdmin, @PathVariable Long idToDelete){
 
@@ -106,12 +107,6 @@ public class PlayerController {
         return new ResponseEntity<>("Throws deleted for player " +idToDelete, HttpStatus.ACCEPTED);
     }
 
-    ////ROLES
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/roles/add/{playerId}/{rolename}")
-    public void addRole(@PathVariable Long playerId, @PathVariable String rolename) {
 
-        playerService.addRoleToPlayer(rolename, playerId);
-    }
 
 }

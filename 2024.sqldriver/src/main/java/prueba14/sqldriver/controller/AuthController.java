@@ -36,13 +36,6 @@ public class AuthController {
         return new ResponseEntity<>(authService.login(playerDTO), HttpStatus.OK);
     }
 
-    @PostMapping("/register/admin")
-    public ResponseEntity<MessageResponse> registerAdmin(@Valid @RequestBody PlayerDto playerDto) {
-
-       authService.registerAdmin(playerDto);
-
-       return ResponseEntity.ok(new MessageResponse("Admin registered successfully!"));
-    }
 
     @PostMapping("/register")
     public ResponseEntity<MessageResponse> register(@Valid @RequestBody PlayerDto playerDto) {

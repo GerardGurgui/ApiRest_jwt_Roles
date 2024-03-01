@@ -218,38 +218,6 @@ public class PlayerServiceTest {
 //        });
 //    }
 
-    //// ROLES
-    @Test
-    public void addRoleToPlayerTest(){
-
-
-        when(playerRepository.findById(playerTest.getId())).thenReturn(Optional.of(playerTest));
-        when(rolesRepository.findRoleByName(roleUser.getName())).thenReturn(Optional.of(roleUser));
-        when(playerRepository.save(any(Player.class))).thenReturn(playerTest);
-
-        assertTrue(playerTest.getRoles().isEmpty());
-
-        playerService.addRoleToPlayer(roleUser.getName(), playerTest.getId());
-
-        assertTrue(playerTest.getRoles().contains(roleUser));
-
-
-        verify(playerRepository, times(1)).save(playerTest);
-
-    }
-
-    @Test
-    public void addRoleToPlayerTest_AdminAlreadyExists(){
-
-        when(playerRepository.findById(playerTest.getId())).thenReturn(Optional.of(playerTest));
-        when(rolesRepository.findRoleByName(roleAdmin.getName())).thenReturn(Optional.of(roleAdmin));
-        when(rolesRepository.existsByRoleName("admin")).thenReturn(true);
-
-        assertThrows(AdminAlreadyExistsException.class, () -> {
-            playerService.addRoleToPlayer(roleAdmin.getName(), playerTest.getId());
-        });
-
-    }
 
 
     ////DADOS

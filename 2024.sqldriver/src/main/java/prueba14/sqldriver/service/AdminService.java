@@ -1,19 +1,15 @@
 package prueba14.sqldriver.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import prueba14.sqldriver.DTO.PlayerDto;
 import prueba14.sqldriver.entities.Player;
 import prueba14.sqldriver.entities.Roles;
-import prueba14.sqldriver.mapper.Map;
+import prueba14.sqldriver.exceptions.PlayerNotFoundException;
+import prueba14.sqldriver.exceptions.RolNotFoundException;
 import prueba14.sqldriver.repository.PlayerRepository;
 import prueba14.sqldriver.repository.RolesRepository;
-import prueba14.sqldriver.security.user.CustomUserDetails;
+import prueba14.sqldriver.security.service.UserDetailsServiceImple;
 
 import java.util.*;
 
@@ -25,22 +21,27 @@ public class AdminService {
     @Autowired
     private RolesRepository rolesRepository;
     @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private Map mapping;
+    private UserDetailsServiceImple userDetailsService;
 
 
-    //ATRIBUTO ADMIN DE CADA USUARIO SOLAMENTE REPRESNTATIVO, NO TIENE IMPACTO EN LA AUTORIZACION REAL
-    public Player createAdmin(PlayerDto playerDto){
+    public void modifyRole(Long playerId, String rolename) {
 
-        Player admin = mapping.map(playerDto);
+        //comprobar si existe el jugador
+        Player player = playerRepository.findById(playerId)
+                .orElseThrow(() -> new PlayerNotFoundException(HttpStatus.NOT_FOUND, "Player not found"));
 
-        Set<Roles> roles = new HashSet<>();
-        roles.add(rolesRepository.findRoleByName("ADMIN").get());
+        //comprobar si existe el rol
+        Roles role = rolesRepository.findRoleByName(rolename)
+                .orElseThrow(() -> new RolNotFoundException(HttpStatus.NOT_FOUND, "Role not found"));
 
-        admin.setRoles(roles);
+        Set<Roles> roles = player.getRoles();
+        roles.add(role);
+        player.setRoles(roles);
+        playerRepository.save(player);
 
-        return playerRepository.save(admin);
+        //actualizar el rol del usuario customUserDetails con grantAuthority
+        userDetailsService.loadUserByUsername(player.getUsername());
+
     }
 
 

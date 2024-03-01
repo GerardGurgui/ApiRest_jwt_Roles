@@ -30,12 +30,8 @@ import java.util.List;
 @Service
 public class UserDetailsServiceImple implements UserDetailsService {
 
-
     @Autowired
     private PlayerRepository playerRepository;
-
-    @Autowired
-    private AuthenticationManagerBuilder authenticationManagerBuilder;
 
     @Autowired
     private CustomUserDetails superAdmin;
@@ -45,15 +41,14 @@ public class UserDetailsServiceImple implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        // Usuario en memoria
+        // Usuario admin en memoria
         if (superAdmin.getUsername().equals(username)) {
 
             return superAdmin;
 
         } else {
 
-            // NO SE SI ES CORRECTO ASIGNAR ROL AQUI.. YA QUE CADA VEZ QUE HACE LOGIN SE ASIGNA EL ROL DE NUEVO?
-            // Usuario en la base de datos
+        // Usuario en la base de datos
             Player player = playerRepository.getPlayerByUsername(username)
                     .orElseThrow(() -> new UsernameNotFoundException("User " + username + " not found"));
 
@@ -70,7 +65,6 @@ public class UserDetailsServiceImple implements UserDetailsService {
 
 
     //asigna roles dependiendo de si el usuario es admin o no
-    //FALTA REVISAR CON LA IMPLEMENTACION DEL USUARIO SUPERADMIN NO SE SI NECESITO ESTE ROL ADMIN AQUI
     private Collection<? extends GrantedAuthority> getAuthorities(Player player) {
 
         if (player.isAdmin()){
@@ -79,6 +73,8 @@ public class UserDetailsServiceImple implements UserDetailsService {
             return getUserAuthorities();
         }
     }
+
+
 
     private Collection<? extends GrantedAuthority> getUserAuthorities() {
 
