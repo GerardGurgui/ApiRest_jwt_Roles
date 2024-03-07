@@ -6,7 +6,7 @@ This is a Spring Boot application that simulates a dice game. Players can throw 
 
 The scores of each player, the success rate, and the average of the dice results are recorded.
 
-Players also have assigned roles, which can be 'user' or 'admin'.
+Players also have assigned roles, which can be 'user', 'admin' or 'superAdmin'. The 'superAdmin' is an in-memory user with all privileges.
 
 ## Technologies Used
 
@@ -27,7 +27,7 @@ Players also have assigned roles, which can be 'user' or 'admin'.
 
 The application uses Spring Security for authentication and authorization. Users are stored in a database and JWT is used for authentication.
 
-Users with the 'admin' role can perform all operations, while users with the 'user' role can only throw dice and view their own data.
+Users with the 'admin' or 'superAdmin' role can perform all operations, while users with the 'user' role can only throw dice and view their own data.
 
 ## Registration System
 The registration system is based on a token system, which are generated when logging in and are stored in the user's browser.
@@ -40,18 +40,43 @@ The application has the following main entities:
 
 - `Player`: Represents a player in the game. Each player has a set of roles and can throw dice.
 - `Dice`: Represents a dice throw. Each dice throw is associated with a player.
-- `Roles`: Represents the roles a player can have. The roles can be 'user' or 'admin'.
+- `Roles`: Represents the roles a player can have. The roles can be 'user', 'admin' or 'superAdmin'.
+
+## Services
+
+The application has the following main services:
+
+- `AuthService`: Handles the authentication of users.
+- `AdminService`: Handles the operations that can be performed by users with the 'admin' or 'superAdmin' role.
 
 ## Endpoints
 
-The application exposes the following endpoints:
+### PlayerController
 
-- `POST /players/add`: Creates a new player.
 - `GET /players/get/findAll`: Gets all players.
 - `GET /players/get/getById/{id}`: Gets a player by their ID.
 - `GET /players/get/getByUsername/{username}`: Gets a player by their username.
 - `PUT /players/updatePlayer/{id}`: Updates a player.
-- `DELETE /players/delete/{id}`: Deletes a player. Only users with the 'admin' role can do this.
 - `POST /players/dice/throw/{id}`: A player throws the dice.
-- `DELETE /players/dice/delete/{id}`: Deletes all dice throws of a player.
-- `POST /players/roles/add/{playerId}/{rolename}`: Adds a role to a player.
+- `GET /players/dice/get/{id}`: Gets all dice throws of a player.
+- `DELETE /players/dice/deleteThrows/{id}`: Deletes all dice throws of a player.
+
+### AdminController
+
+- `POST /admin/{playerId}/{rolename}`: Modifies the role of a player. Only users with the 'admin' role can do this.
+- `DELETE /admin/deleteUser/{idToDelete}`: Deletes a player. Only users with the 'admin' role can do this.
+
+### AuthController
+
+- `POST /api/auth/login`: Logs in a player and returns a JWT token.
+- `POST /api/auth/register`: Registers a new player.
+
+## Tests
+
+The application includes tests for the services and controllers. The tests use JUnit and Mockito. The tests cover the following:
+
+- `PlayerServiceTest`: Tests the methods in the `PlayerService`.
+- `DiceServiceTest`: Tests the methods in the `DiceService`.
+- `AuthServiceTest`: Tests the methods in the `AuthService`.
+- `AdminServiceTest`: Tests the methods in the `AdminService`.
+- `UserDetailsServiceImplTest`: Tests the `loadUserByUsername` method in the `UserDetailsServiceImpl`, including the case where the user is not found in the database and the username matches 'superAdmin'.
