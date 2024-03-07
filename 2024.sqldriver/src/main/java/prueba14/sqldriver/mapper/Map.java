@@ -1,18 +1,23 @@
 package prueba14.sqldriver.mapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import prueba14.sqldriver.DTO.PlayerDto;
 import prueba14.sqldriver.entities.Player;
+import prueba14.sqldriver.exceptions.AdminAlreadyExistsException;
+import prueba14.sqldriver.security.user.CustomUserDetails;
 
 import java.time.LocalDate;
 
 @Component
 public class Map implements Imapper<PlayerDto, Player> {
 
-
     private PasswordEncoder encoder;
+    @Autowired
+    private CustomUserDetails superAdmin;
 
     @Autowired
     public Map(PasswordEncoder encoder) {
@@ -24,9 +29,14 @@ public class Map implements Imapper<PlayerDto, Player> {
 
         Player player = new Player();
 
+        if (playerDto.getUsername().equalsIgnoreCase(superAdmin.getUsername())) {
+
+            throw new AdminAlreadyExistsException(HttpStatus.CONFLICT,"Error: Username is already taken for admin");
+        }
+
         if (playerDto.getUsername().isEmpty()) {
 
-            player.setUsername("Anonimo");
+            player.setUsername("Anonymous");
 
         } else {
 
@@ -46,6 +56,10 @@ public class Map implements Imapper<PlayerDto, Player> {
 
 
         if (playerDto.getUsername() != null) {
+
+            if (playerDto.getUsername().equalsIgnoreCase(superAdmin.getUsername())) {
+                throw new AdminAlreadyExistsException(HttpStatus.CONFLICT,"Error: Username is already taken for admin");
+            }
 
             playerToUpdate.setUsername(playerDto.getUsername());
         }

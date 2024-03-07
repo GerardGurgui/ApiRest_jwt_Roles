@@ -18,6 +18,7 @@ import prueba14.sqldriver.security.user.CustomUserDetails;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Autentica un usuario de la base de datos
@@ -37,21 +38,17 @@ public class UserDetailsServiceImple implements UserDetailsService {
     private CustomUserDetails superAdmin;
 
 
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        // Usuario admin en memoria
-        if (superAdmin.getUsername().equals(username)) {
+        Optional<Player> playerOpt = playerRepository.getPlayerByUsername(username);
 
-            return superAdmin;
+        // Comprueba si el usuario existe en la base de datos
+        if (playerOpt.isPresent() && playerOpt.get().getUsername().equals(username)) {
 
-        } else {
+            Player player = playerOpt.get();
 
-        // Usuario en la base de datos
-            Player player = playerRepository.getPlayerByUsername(username)
-                    .orElseThrow(() -> new UsernameNotFoundException("User " + username + " not found"));
-
+            // asigna los roles del usuario
             Collection<? extends GrantedAuthority> authorities = getAuthorities(player);
 
             return new CustomUserDetails(
@@ -60,6 +57,14 @@ public class UserDetailsServiceImple implements UserDetailsService {
                     authorities,
                     player.getId()
             );
+
+            // si el usuario no existe en la base de datos, comprueba si es el usuario en memoria
+        } else if (playerOpt.isEmpty() && superAdmin.getUsername().equals(username)) {
+
+            return superAdmin;
+
+        } else {
+            throw new UsernameNotFoundException("User " + username + " not found");
         }
     }
 
@@ -80,7 +85,7 @@ public class UserDetailsServiceImple implements UserDetailsService {
 
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-        authorities.add(new SimpleGrantedAuthority("READ"));
+//        authorities.add(new SimpleGrantedAuthority("READ"));
         return authorities;
     }
 

@@ -1,6 +1,7 @@
 package prueba14.sqldriver.servicesTest;
 
 
+import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,7 +38,6 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@TestPropertySource(locations="classpath:application-test.properties")
 public class PlayerServiceTest {
 
     @InjectMocks
@@ -85,12 +85,13 @@ public class PlayerServiceTest {
         playerTest.setUsername("playerTest");
         playerTest.setPassword("playerTest");
         playerTest.setEmail("playerTest");
-        playerTest.setRoles(new HashSet<>());
 
         //DADOS
         diceTest.setDado1(1);
         diceTest.setDado2(1);
         diceTest.setResultadoTirada(2);
+
+        playerTest.addThrow(diceTest);
 
         //DTO
         playerDtoTest.setUsername("playerDtoTest");
@@ -108,6 +109,8 @@ public class PlayerServiceTest {
         roleAdmin.setId(2L);
         roleAdmin.setName("ADMIN");
 
+        playerTest.setRoles(roles);
+
         ////DELETE
         playerToDelete.setId(2L);
 
@@ -124,19 +127,21 @@ public class PlayerServiceTest {
 
         when(mapping.map(playerDtoTest)).thenReturn(playerTest);
         when(playerRepository.save(any(Player.class))).thenReturn(playerTest);
+        when(rolesRepository.findRoleByName("USER")).thenReturn(Optional.of(roleUser));
 
         Player playerResult = playerService.createPlayer(playerDtoTest);
 
         assertEquals(playerResult.getUsername(), playerTest.getUsername());
         assertEquals(playerResult.getEmail(), playerTest.getEmail());
         assertEquals(playerResult.getPassword(), playerTest.getPassword());
+        assertEquals(playerResult.getRoles(), playerTest.getRoles());
 
         verify(playerRepository, times(1)).save(playerTest);
 
     }
 
 
-    ////GETS
+    ////GET
     @Test
     public void getPlayerTest(){
 
@@ -183,43 +188,6 @@ public class PlayerServiceTest {
 
     }
 
-//    @Test
-//    public void deletePlayer(){
-//
-//        //simular comportamiento de un un usuario que no es admin (no debería poder borrar)
-//        when(playerRepository.existsById(playerNotAdmin.getId())).thenReturn(true);
-//        when(playerRepository.findById(playerNotAdmin.getId())).thenReturn(Optional.of(playerNotAdmin));
-//
-//        //comprobar que el usuario existe y tiene rol de usuario
-//        when(playerRepository.existsById(playerToDelete.getId())).thenReturn(true);
-//        assertTrue(playerRepository.existsById(playerToDelete.getId()));
-//        assertTrue(playerNotAdmin.getRoles().contains(roleUser));
-//
-//        // definimos a un usuario como admin para que pueda borrar
-//        playerTest.addRole(roleAdmin);
-//        assertTrue(playerTest.getRoles().contains(roleAdmin));
-//
-//        //simulamos comportamientos necesarios del metodo deletePlayer (admin y usuario a borrar)
-//        when(playerRepository.existsById(playerTest.getId())).thenReturn(true);
-//        when(playerRepository.findById(playerTest.getId())).thenReturn(Optional.of(playerTest));
-//
-//        when(playerRepository.existsById(playerToDelete.getId())).thenReturn(true);
-//        when(playerRepository.findById(playerToDelete.getId())).thenReturn(Optional.of(playerToDelete));
-//
-//        playerService.deletePlayer(playerTest.getId(), playerToDelete.getId());
-//
-//        //comprobar que se ha borrado el usuario
-//        when(playerRepository.existsById(playerToDelete.getId())).thenReturn(false);
-//        assertFalse(playerRepository.existsById(playerToDelete.getId()));
-//
-//        //comprobar que si no es un admin no puede eliminar a otro usuario
-//        assertThrows(RolNotFoundException.class, () -> {
-//            playerService.deletePlayer(playerNotAdmin.getId(), playerToDelete.getId());
-//        });
-//    }
-
-
-
     ////DADOS
     @Test
     public void playerThrowDiceTest(){
@@ -241,7 +209,18 @@ public class PlayerServiceTest {
 
     }
 
-    //FALTA ELIMINAR TIRADAS
+    @Test
+    public void deleteThrowsTest(){
 
+        when(playerRepository.existsById(playerTest.getId())).thenReturn(true);
+        when(playerRepository.findById(playerTest.getId())).thenReturn(Optional.of(playerTest));
+
+        assertFalse(playerTest.getThrowsDices().isEmpty());
+
+        playerService.deleteThrows(playerTest.getId());
+
+        assertTrue(playerTest.getThrowsDices().isEmpty());
+
+    }
 
 }

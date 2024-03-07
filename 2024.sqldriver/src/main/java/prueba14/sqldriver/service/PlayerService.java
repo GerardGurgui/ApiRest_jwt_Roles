@@ -16,6 +16,7 @@ import prueba14.sqldriver.repository.RolesRepository;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -43,8 +44,8 @@ public class PlayerService {
 
         //añadir rol USER
         Set<Roles> roles = new HashSet<>();
-        roles.add(rolesRepository.findRoleByName("USER").get());
-
+        Optional<Roles> roleUser = rolesRepository.findRoleByName("USER");
+        roleUser.ifPresent(roles::add);
         playerEntity.setRoles(roles);
 
         return playerRepository.save(playerEntity);
@@ -104,14 +105,6 @@ public class PlayerService {
         return playerRepository.save(playerToUpdate);
     }
 
-    ////////DELETE
-
-    public void deletePlayer(Long idToDelete){
-
-        Player playerToDelete = getOnePlayerByID(idToDelete);
-
-        playerRepository.delete(playerToDelete);
-    }
 
     /////FUNCIONALIDADES JUEGO (DADOS, PORCENTAJES)
 
@@ -143,27 +136,24 @@ public class PlayerService {
         return diceRepository.save(dice);
     }
 
-    public void deleteThrows(Long idPlayer,Long idToDeleteThrows){
+    public void deleteThrows(Long idPlayer){
 
         //buscar primero el jugador
         Player player = getOnePlayerByID(idPlayer);
 
-        //comprobar si es admin
-        boolean isAdmin = player.isAdmin();
+        //comprobar que tiene tiradas
+        if (player.getThrowsDices() != null && player.getThrowsDices().isEmpty()){
 
-        if (!isAdmin){
-
-            throw new UserUnauthorizedException(HttpStatus.UNAUTHORIZED, "this user is not an admin");
+            throw new PlayerNoDiceThrowsException(HttpStatus.NOT_FOUND, "This player don't have any dices throws");
         }
 
         //buscar jugador a borrar tiradas
-        Player playerToDeleteThrows = getOnePlayerByID(idToDeleteThrows);
 
-        Set<Dice> throwsDices = playerToDeleteThrows.getThrowsDices();
+        Set<Dice> throwsDices = player.getThrowsDices();
 
-        playerToDeleteThrows.getThrowsDices().removeAll(throwsDices);
+        player.getThrowsDices().removeAll(throwsDices);
 
-        playerRepository.save(playerToDeleteThrows);
+        playerRepository.save(player);
 
     }
 
