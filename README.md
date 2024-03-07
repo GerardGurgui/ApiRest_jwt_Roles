@@ -48,6 +48,7 @@ The application has the following main services:
 
 - `AuthService`: Handles the authentication of users.
 - `AdminService`: Handles the operations that can be performed by users with the 'admin' or 'superAdmin' role.
+- `PlayerService`: The PlayerService in your application provides the main business logic for operations related to players and their dice throws. 
 
 ## Endpoints
 
