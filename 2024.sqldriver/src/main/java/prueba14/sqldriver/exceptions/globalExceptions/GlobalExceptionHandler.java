@@ -3,6 +3,7 @@ package prueba14.sqldriver.exceptions.globalExceptions;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -45,6 +46,21 @@ public class GlobalExceptionHandler {
         ErrorDetails errorDetails = new ErrorDetails();
         errorDetails.setTimestamp(new Date());
         errorDetails.setMessage("Player Not Found");
+        errorDetails.setErrors(errors);
+
+        return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+    }
+
+    //PLAYERS--> USER NAME NOT FOUND EXCEPTION
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<ErrorDetails> handleUsernameNotFoundException(UsernameNotFoundException ex, WebRequest request) {
+
+        List<String> errors = new ArrayList<>();
+        errors.add(ex.getMessage());
+
+        ErrorDetails errorDetails = new ErrorDetails();
+        errorDetails.setTimestamp(new Date());
+        errorDetails.setMessage("Username Not Found");
         errorDetails.setErrors(errors);
 
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
@@ -167,6 +183,21 @@ public class GlobalExceptionHandler {
         errorDetails.setErrors(errors);
 
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+    }
+
+    //DICE--> PLAYER HAS THROWS EXCEPTION
+    @ExceptionHandler(PlayerHasThrowsException.class)
+    public ResponseEntity<ErrorDetails> handlePlayerHasThrowsException(PlayerHasThrowsException ex, WebRequest request) {
+
+        List<String> errors = new ArrayList<>();
+        errors.add(ex.getMessage());
+
+        ErrorDetails errorDetails = new ErrorDetails();
+        errorDetails.setTimestamp(new Date());
+        errorDetails.setMessage("Player Has Throws and can't be deleted");
+        errorDetails.setErrors(errors);
+
+        return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
     }
 
     //MANEJAR VALIDACION DE DATOS INTRODUCIDOS POR EL USUARIO

@@ -2,14 +2,19 @@ package prueba14.sqldriver.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import prueba14.sqldriver.entities.Dice;
 import prueba14.sqldriver.entities.Player;
 import prueba14.sqldriver.entities.Roles;
 import prueba14.sqldriver.exceptions.PlayerNotFoundException;
 import prueba14.sqldriver.exceptions.RolNotFoundException;
+import prueba14.sqldriver.repository.DiceRepository;
 import prueba14.sqldriver.repository.PlayerRepository;
 import prueba14.sqldriver.repository.RolesRepository;
 import prueba14.sqldriver.security.service.UserDetailsServiceImple;
+import prueba14.sqldriver.security.user.CustomUserDetails;
 
 import java.util.*;
 
@@ -20,6 +25,8 @@ public class AdminService {
     private  PlayerRepository playerRepository;
     @Autowired
     private RolesRepository rolesRepository;
+    @Autowired
+    private DiceRepository diceRepository;
     @Autowired
     private UserDetailsServiceImple userDetailsService;
 
@@ -44,5 +51,27 @@ public class AdminService {
 
     }
 
+
+    public void deletePlayer(Long idToDelete){
+
+        Player playerToDelete = playerRepository.findById(idToDelete)
+                .orElseThrow(() -> new PlayerNotFoundException(HttpStatus.NOT_FOUND, "Player not found"));
+
+        if (!playerToDelete.getRoles().isEmpty()){
+
+            playerToDelete.getRoles().clear();
+        }
+
+        if (!playerToDelete.getThrowsDices().isEmpty()){
+
+            Set<Dice> throwsDices = playerToDelete.getThrowsDices();
+
+            playerToDelete.getThrowsDices().removeAll(throwsDices);
+
+            diceRepository.deleteAll(throwsDices);
+        }
+
+        playerRepository.delete(playerToDelete);
+    }
 
 }

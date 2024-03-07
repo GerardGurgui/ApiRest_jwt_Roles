@@ -61,16 +61,8 @@ public class PlayerController {
 
     }
 
-    @DeleteMapping("/delete/{idToDelete}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public void deletePlayer(@PathVariable Long idToDelete){
 
-        playerService.deletePlayer(idToDelete);
-    }
-
-
-
-    /////DADOS, FUNCIONES JUEGO, ROLES
+    /////-----DADOS
 
     @PostMapping("/dice/throw/{id}")
     public ResponseEntity<Dice> playerThrowDice(@PathVariable Long id){
@@ -91,20 +83,19 @@ public class PlayerController {
         return ResponseEntity.ok(playerService.getThrows(id));
     }
 
-    //FALTAAAA
-    @DeleteMapping("/dice/delete/{idAdmin}/{idToDelete}")
-    public ResponseEntity<String> deleteThrows(@PathVariable Long idAdmin, @PathVariable Long idToDelete){
+    @DeleteMapping("/dice/deleteThrows/{id}")
+    public ResponseEntity<String> deleteThrows(@PathVariable Long id){
 
-        Long idAutenticado = userDetailsServiceImple.getAuthenticatedUserId(idAdmin).getBody();
+        Long idAutenticado = userDetailsServiceImple.getAuthenticatedUserId(id).getBody();
 
-        if (idAutenticado == null || !idAutenticado.equals(idAdmin)){
+        if (idAutenticado == null || !idAutenticado.equals(id)){
 
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
-        playerService.deleteThrows(idAdmin, idToDelete);
+        playerService.deleteThrows(id);
 
-        return new ResponseEntity<>("Throws deleted for player " +idToDelete, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>("Throws deleted for player " +id, HttpStatus.ACCEPTED);
     }
 
 
