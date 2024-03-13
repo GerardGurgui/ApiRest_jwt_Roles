@@ -43,10 +43,9 @@ public class PlayerService {
         Player playerEntity = mapping.map(playerDto);
 
         //añadir rol USER
-        Set<Roles> roles = new HashSet<>();
         Optional<Roles> roleUser = rolesRepository.findRoleByName("USER");
-        roleUser.ifPresent(roles::add);
-        playerEntity.setRoles(roles);
+
+        roleUser.ifPresent(playerEntity::addRole);
 
         return playerRepository.save(playerEntity);
 

@@ -11,6 +11,7 @@ import prueba14.sqldriver.exceptions.AdminAlreadyExistsException;
 import prueba14.sqldriver.security.user.CustomUserDetails;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 
 @Component
 public class Map implements Imapper<PlayerDto, Player> {
@@ -46,6 +47,8 @@ public class Map implements Imapper<PlayerDto, Player> {
         player.setEmail(playerDto.getEmail());
         player.setPassword(encoder.encode(playerDto.getPassword()));
         player.setLoginDate(LocalDate.now());
+        player.setRoles(new HashSet<>());
+        player.setThrowsDices(new HashSet<>());
 
         return player;
 

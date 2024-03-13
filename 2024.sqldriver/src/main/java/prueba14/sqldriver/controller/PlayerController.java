@@ -36,13 +36,13 @@ public class PlayerController {
     @GetMapping("/get/getById/{id}")
     public ResponseEntity<Player> getOnePlayerByID(@PathVariable Long id){
 
-        return ResponseEntity.ok(playerService.getOnePlayerByID(id));
+        return new ResponseEntity<>(playerService.getOnePlayerByID(id), HttpStatus.FOUND);
     }
 
     @GetMapping("/get/getByUsername/{username}")
     public ResponseEntity<Player> getOnePlayerByUsername(@PathVariable String username){
 
-        return ResponseEntity.ok(playerService.getOnePlayerByUsername(username));
+        return new ResponseEntity<>(playerService.getOnePlayerByUsername(username), HttpStatus.FOUND);
     }
 
 

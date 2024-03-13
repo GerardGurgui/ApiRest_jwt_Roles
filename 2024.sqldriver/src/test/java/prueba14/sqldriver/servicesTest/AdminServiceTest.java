@@ -7,9 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 import prueba14.sqldriver.entities.Dice;
 import prueba14.sqldriver.entities.Player;
 import prueba14.sqldriver.entities.Roles;
@@ -70,10 +68,10 @@ public class AdminServiceTest {
 
         roleAdmin = new Roles();
         roleAdmin.setId(2L);
-        roleAdmin.setName("ROLE_ADMIN");
+        roleAdmin.setName("ADMIN");
 
         //añadimos solamente el rol de usuario al jugador
-        //para poder probar el metodo modifyRole y añadir el rol de admin
+        //para poder probar el metodo addRole y añadir el rol de admin
         roles.add(roleUser);
 
         playerTest.setRoles(roles);
@@ -95,7 +93,7 @@ public class AdminServiceTest {
 
         when(playerRepository.findById(playerTest.getId())).thenReturn(Optional.of(playerTest));
 
-        adminService.deletePlayer(playerTest.getId());
+        adminService.deleteUser(playerTest.getId());
 
         verify(playerRepository, times(1)).delete(playerTest);
 
@@ -107,7 +105,7 @@ public class AdminServiceTest {
     }
 
     @Test
-    public void modifyRoleTest(){
+    public void addRoleTest(){
 
         when(playerRepository.findById(playerTest.getId())).thenReturn(Optional.of(playerTest));
         when(rolesRepository.findRoleByName(roleAdmin.getName())).thenReturn(Optional.of(roleAdmin));
@@ -115,9 +113,27 @@ public class AdminServiceTest {
         assertTrue(playerTest.getRoles().contains(roleUser));
         assertFalse(playerTest.getRoles().contains(roleAdmin));
 
-        adminService.modifyRole(playerTest.getId(), roleAdmin.getName());
+        adminService.addRole(playerTest.getId(), roleAdmin.getName());
 
         assertTrue(playerTest.getRoles().contains(roleAdmin));
+
+        verify(playerRepository, times(1)).save(playerTest);
+    }
+
+    @Test
+    public void deleteRoleTest(){
+
+        playerTest.getRoles().add(roleAdmin);
+
+        when(playerRepository.findById(playerTest.getId())).thenReturn(Optional.of(playerTest));
+        when(rolesRepository.findRoleByName(roleAdmin.getName())).thenReturn(Optional.of(roleAdmin));
+
+        assertTrue(playerTest.getRoles().contains(roleAdmin));
+
+        adminService.deleteRole(playerTest.getId(), roleAdmin.getName());
+
+        assertFalse(playerTest.getRoles().contains(roleAdmin));
+        assertTrue(playerTest.getRoles().contains(roleUser));
 
         verify(playerRepository, times(1)).save(playerTest);
     }

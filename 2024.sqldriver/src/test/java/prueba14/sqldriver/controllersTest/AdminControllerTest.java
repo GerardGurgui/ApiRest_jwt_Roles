@@ -51,12 +51,12 @@ public class AdminControllerTest {
 
     @Test
     @Transactional
-    public void modifyRoleTest() throws Exception {
+    public void addRoleTest() throws Exception {
 
         token = authenticate("playerAdmin", "playerAdmin");
 
         //modificar el rol del usuario con id 2
-        String url = CONTROLLER_BASE_URL + "/2/ADMIN";
+        String url = CONTROLLER_BASE_URL + "/addRole/2/ADMIN";
 
         mockMvc.perform(post(url)
                         .header("Authorization", "Bearer " + token))
@@ -66,15 +66,30 @@ public class AdminControllerTest {
 
     @Test
     @Transactional
-    public void onlyAdminCanModifyRoleTest() throws Exception {
+    public void onlyAdminCanAddRoleTest() throws Exception {
 
         token = authenticate("player1", "password1");
 
-        String urlNotAuthorized = CONTROLLER_BASE_URL + "/2/ADMIN";
+        String urlNotAuthorized = CONTROLLER_BASE_URL + "/addRole/2/ADMIN";
 
         mockMvc.perform(post(urlNotAuthorized)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isForbidden())
+                .andDo(print());
+    }
+
+    @Test
+    @Transactional
+    public void deleteRoleTest() throws Exception {
+
+        token = authenticate("playerAdmin", "playerAdmin");
+
+        //eliminar el rol admin del usuario con id 2
+        String url = CONTROLLER_BASE_URL + "/deleteRole/2/ADMIN";
+
+        mockMvc.perform(delete(url)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
                 .andDo(print());
     }
 

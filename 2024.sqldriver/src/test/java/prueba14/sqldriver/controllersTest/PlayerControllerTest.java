@@ -29,13 +29,11 @@ public class PlayerControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
     @Autowired
     private ObjectMapper objectMapper;
 
     private final String CONTROLLER_BASE_URL = "/players";
     private final String CONTROLLER_AUTH_URL = "/api/auth";
-
     private String token;
 
 
@@ -63,7 +61,7 @@ public class PlayerControllerTest {
 
         mockMvc.perform(get(url))
                 .andDo(print())
-                .andExpect(status().isOk())
+                .andExpect(status().isFound())
                 .andExpect(jsonPath("$.username").value("player1"));
 
     }
@@ -88,7 +86,7 @@ public class PlayerControllerTest {
         String url = CONTROLLER_BASE_URL + "/get/getByUsername/player2";
 
         mockMvc.perform(get(url))
-                .andExpect(status().isOk())
+                .andExpect(status().isFound())
                 .andDo(print())
                 .andExpect(jsonPath("$.username").value("player2"));
     }
