@@ -22,6 +22,7 @@ Players also have assigned roles, which can be 'user', 'admin' or 'superAdmin'. 
 ## Testing
 - JUnit
 - Mockito
+- Integration Tests
 
 ## Security
 
