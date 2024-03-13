@@ -65,8 +65,9 @@ The application has the following main services:
 
 ### AdminController
 
-- `POST /admin/{playerId}/{rolename}`: Modifies the role of a player. Only users with the 'admin' role can do this.
+- `POST /admin/addRole/{playerId}/{rolename}`: Modifies the role of a player. Only users with the 'admin' role can do this.
 - `DELETE /admin/deleteUser/{idToDelete}`: Deletes a player. Only users with the 'admin' role can do this.
+- `DELETE /admin/deleteRole/{idToDelete}/{rolename}`: Deletes a role from user. Only users with the 'admin' role and cannot delete the user role.
 
 ### AuthController
 
@@ -82,3 +83,7 @@ The application includes tests for the services and controllers. The tests use J
 - `AuthServiceTest`: Tests the methods in the `AuthService`.
 - `AdminServiceTest`: Tests the methods in the `AdminService`.
 - `UserDetailsServiceImplTest`: Tests the `loadUserByUsername` method in the `UserDetailsServiceImpl`, including the case where the user is not found in the database and the username matches 'superAdmin'.
+- `AdminControllerTest`: Tests the methods in the `AdminController`.
+- `AuthControllerTest`: Tests the methods in the `AuthController`.
+- `PlayerControllerTest`: Tests the methods in the `PlayerController`
+- `ApiRestIntegrationTest`: Integration tests to verify the interaction between different parts of the application, such as services, repositories, and controllers.
